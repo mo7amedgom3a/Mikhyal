@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+/* Mikhyal design tokens (UI/UX design system v1, §11) */
+:root {
+  --brand-primary: #5146e8;
+  --brand-primary-hover: #4136cd;
+  --brand-primary-soft: #eef0ff;
+  --brand-primary-edge: #3a30b8;
+  --brand-discovery: #12a889;
+  --brand-discovery-dark: #08765e;
+  --brand-discovery-soft: #e8f7ef;
+  --brand-insight: #f4b544;
+  --brand-insight-dark: #b07a12;
+  --brand-insight-soft: #fff4da;
+  --danger: #e5484d;
+  --danger-soft: #ffeceb;
+  --background: #f8faf9;
+  --surface: #ffffff;
+  --surface-muted: #f1f5f3;
+  --surface-simulation: #f4f6ff;
+  --foreground: #172234;
+  --text-secondary: #526173;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+  --border: #e2e8e5;
+  --border-strong: #cfd8d3;
+}
+
+@theme inline {
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-primary-soft: var(--brand-primary-soft);
+  --color-primary-edge: var(--brand-primary-edge);
+  --color-mint: var(--brand-discovery);
+  --color-mint-dark: var(--brand-discovery-dark);
+  --color-mint-soft: var(--brand-discovery-soft);
+  --color-amber: var(--brand-insight);
+  --color-amber-dark: var(--brand-insight-dark);
+  --color-amber-soft: var(--brand-insight-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-canvas: var(--background);
+  --color-surface: var(--surface);
+  --color-muted: var(--surface-muted);
+  --color-sim: var(--surface-simulation);
+  --color-ink: var(--foreground);
+  --color-ink-2: var(--text-secondary);
+  --color-ink-3: var(--text-muted);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --font-sans: var(--font-arabic), var(--font-latin), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-ar), var(--font-arabic), ui-sans-serif, sans-serif;
+  --font-latin: var(--font-latin), ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 20px;
+  --radius-ctl: 14px;
+}
+
+html {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--background);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+/* Duolingo-feel "sticker" buttons: chunky 2px edge + bottom ledge that presses in. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border-radius: var(--radius-ctl);
+  font-weight: 700;
+  font-size: 1rem;
+  border: 2px solid transparent;
+  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 0 var(--ledge, transparent);
+}
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.btn-primary {
+  --ledge: var(--brand-primary-edge);
+  background: var(--brand-primary);
+  color: var(--text-inverse);
+  box-shadow: 0 4px 0 0 var(--ledge);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--brand-primary-hover);
+}
+.btn-mint {
+  --ledge: var(--brand-discovery-dark);
+  background: var(--brand-discovery);
+  color: var(--text-inverse);
+  box-shadow: 0 4px 0 0 var(--ledge);
+}
+.btn-amber {
+  --ledge: var(--brand-insight-dark);
+  background: var(--brand-insight);
+  color: var(--foreground);
+  box-shadow: 0 4px 0 0 var(--ledge);
+}
+.btn-ghost {
+  --ledge: var(--border-strong);
+  background: var(--surface);
+  color: var(--brand-primary);
+  border-color: var(--border-strong);
+  box-shadow: 0 4px 0 0 var(--ledge);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--brand-primary-soft);
+}
+
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+}
+
+.focus-ring:focus-visible,
+.btn:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--brand-primary) 55%, transparent);
+  outline-offset: 2px;
+}
+
+/* Range slider */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to left,
+    var(--brand-primary) 0%,
+    var(--brand-primary) var(--fill, 50%),
+    var(--surface-muted) var(--fill, 50%)
+  );
+  border: 2px solid var(--border);
+}
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--brand-primary);
+  box-shadow: 0 2px 0 var(--brand-primary-edge);
+  cursor: grab;
+}
+input[type="range"].slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--brand-primary);
+  cursor: grab;
+}
+
+.ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.pop-in {
+  animation: pop-in 220ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
