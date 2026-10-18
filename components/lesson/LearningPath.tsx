@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Atom, Check, Compass, Scale, Sigma, Sparkles } from "lucide-react";
+import { ArrowLeft, Atom, Check, Compass, Puzzle, Scale, Sigma, Sparkles } from "lucide-react";
 import { MISSIONS } from "@/lib/missions";
 import { MissionIcon } from "@/lib/missions/icons";
 import { emptyState, loadState, missionMastery, type LearnerState } from "@/lib/engine/learnerModel";
@@ -48,6 +48,20 @@ export function LearningPath() {
           </Button>
         </CardContent>
       </Card>
+
+      <Link
+        href="/play"
+        className="group flex items-center gap-4 rounded-[20px] border-2 border-amber bg-amber-soft p-5 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/40"
+      >
+        <span className="grid size-14 shrink-0 place-items-center rounded-[16px] bg-amber text-ink">
+          <Puzzle className="size-7" aria-hidden />
+        </span>
+        <div className="flex-1">
+          <p className="font-bold text-ink">ملعب التجارب</p>
+          <p className="text-sm text-ink-2">ألغاز تفاعلية: ابني دوائر ووازن قوى بإيدك — النتيجة بتتحسب لحظيًا.</p>
+        </div>
+        <ArrowLeft className="size-5 text-amber-dark transition-transform group-hover:-translate-x-1" aria-hidden />
+      </Link>
 
       {totalErrors > 0 && (
         <Card>

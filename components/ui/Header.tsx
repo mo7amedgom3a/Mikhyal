@@ -12,6 +12,7 @@ export function Header({ cta = true }: { cta?: boolean }) {
           {[
             ["/#how", "إزاي بنتعلم", "hidden sm:inline-flex"],
             ["/#missions", "المهمات", "hidden sm:inline-flex"],
+            ["/play", "ملعب التجارب", "inline-flex"],
             ["/#pricing", "الأسعار", "hidden md:inline-flex"],
           ].map(([href, label, cls]) => (
             <Button key={href} asChild variant="ghost" size="sm" className={cls}>

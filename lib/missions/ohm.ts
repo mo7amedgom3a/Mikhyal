@@ -157,6 +157,7 @@ export const ohm: Mission = {
     apply: ["نفس فكرة الفيوز في اللمبة.", "أقل مقاومة ⇔ أكبر تيار مسموح.", "$R = \\dfrac{V}{I}$"],
   },
   reflection: {
+    sandbox: "circuits",
     summary: "اكتشفت قانون أوم $V = IR$، وإن الفيوز بيحدد أقل مقاومة آمنة $R_{min} = \\frac{V}{I_{max}}$.",
     nextMissionId: "fountain",
   },

@@ -164,6 +164,7 @@ export const vectors: Mission = {
     apply: ["$\\cos 60^\\circ = \\frac{1}{2}$.", "عوّض في قاعدة متوازي الأضلاع.", "$R = \\sqrt{148}$"],
   },
   reflection: {
+    sandbox: "forces",
     summary: "اكتشفت إن القوى بتتجمع كمتجهات: $R = \\sqrt{F_1^2 + F_2^2 + 2F_1F_2\\cos\\theta}$، وإن المركبات الجانبية لازم تلغي بعض عشان الحركة تبقى مستقيمة.",
     nextMissionId: "statics",
   },

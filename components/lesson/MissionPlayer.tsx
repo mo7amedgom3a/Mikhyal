@@ -43,6 +43,7 @@ import {
   Gauge,
   History,
   PartyPopper,
+  Puzzle,
   Play,
   RotateCcw,
   Sparkles,
@@ -475,6 +476,13 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
                         <PartyPopper />
                         <AlertDescription>مفيش أخطاء متشخّصة المرة دي — عاش!</AlertDescription>
                       </Alert>
+                    )}
+                    {mission.reflection.sandbox && (
+                      <Button asChild variant="outline" className="w-full">
+                        <Link href={`/play/${mission.reflection.sandbox}`}>
+                          <Puzzle /> جرّب الفكرة في ملعب التجارب
+                        </Link>
+                      </Button>
                     )}
                     <div className="flex flex-wrap gap-2">
                       <Button variant="amber" onClick={() => setMode("exam")} className="flex-1">

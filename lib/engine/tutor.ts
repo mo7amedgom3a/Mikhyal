@@ -1,10 +1,14 @@
 /** Shared tutor contract + deterministic fallback used when no LLM is configured. */
 import type { Diagnosis, Mission, StepId } from "./types";
+import type { Sandbox, SandboxLevel } from "../sandbox/types";
 import { nextHint } from "./pedagogy";
 
 export interface TutorRequest {
-  missionId: string;
-  step: StepId | "exam";
+  missionId?: string;
+  /** Playground requests name a sandbox and level instead of a mission. */
+  sandboxId?: string;
+  levelId?: string;
+  step: StepId | "exam" | "sandbox";
   message?: string;
   hintLevel: number;
   diagnosis?: Diagnosis;
@@ -20,7 +24,7 @@ export interface TutorResponse {
 }
 
 export function rulesReply(mission: Mission, req: TutorRequest): TutorResponse {
-  const hints = req.step === "exam" ? [] : mission.hints[req.step] ?? [];
+  const hints = req.step === "exam" || req.step === "sandbox" ? [] : mission.hints[req.step] ?? [];
   if (req.diagnosis && !req.message) {
     return { reply: req.diagnosis.prompt, hintLevel: req.hintLevel, source: "rules" };
   }
@@ -58,4 +62,29 @@ export function userTurn(req: TutorRequest): string {
       : "The student pressed the hint button. Give the next Socratic hint, a bit more specific than before.",
   );
   return parts.join("\n");
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySandbox = Sandbox<any, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyLevel = SandboxLevel<any, any>;
+
+export function sandboxRulesReply(level: AnyLevel, req: TutorRequest): TutorResponse {
+  const h = nextHint(level.hints, req.hintLevel);
+  const lead = req.message ? "خليني أوجّهك من غير ما أحل بدالك: " : "";
+  return { reply: lead + h.message, hintLevel: h.hintLevel, source: "rules" };
+}
+
+export function sandboxSystemPrompt(sandbox: AnySandbox, level: AnyLevel): string {
+  return [
+    "You are «مِخيال», a Socratic tutor for Egyptian secondary students playing with an interactive sandbox.",
+    "Reply in friendly Egyptian Arabic (عامية مصرية), 1–3 short sentences. Write any equation or symbol as LaTeX between single dollar signs.",
+    "Never place the parts or give the full solution. Point at ONE thing to try or notice on the board, based on its current state.",
+    "Only rely on the board description and the level goals below; the sandbox computes all physics deterministically.",
+    "",
+    `Sandbox: ${sandbox.title} — ${sandbox.tagline}`,
+    `Level: ${level.title}. ${level.story}`,
+    `Goals: ${level.goals.map((g) => g.label).join(" | ")}`,
+    `Hint ladder (for calibration, do not quote verbatim): ${level.hints.join(" / ")}`,
+  ].join("\n");
 }

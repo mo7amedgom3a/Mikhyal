@@ -164,7 +164,7 @@ export interface Mission {
   };
   exam: { timeLimitSec: number; questions: ExamQuestion[] };
   hints: Partial<Record<StepId, string[]>>;
-  reflection: { summary: string; nextMissionId?: string };
+  reflection: { summary: string; nextMissionId?: string; /** Related playground sandbox id. */ sandbox?: string };
 }
 
 export type LearningEventKind =
@@ -174,11 +174,13 @@ export type LearningEventKind =
   | "numeric_attempt"
   | "exam_answer"
   | "hint_requested"
-  | "tutor_message";
+  | "tutor_message"
+  | "sandbox_edit"
+  | "sandbox_level_complete";
 
 export interface LearningEvent {
   missionId: string;
-  step: StepId | "exam";
+  step: StepId | "exam" | "sandbox";
   kind: LearningEventKind;
   correct?: boolean;
   diagnosis?: Diagnosis;

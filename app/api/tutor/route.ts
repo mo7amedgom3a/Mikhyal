@@ -1,7 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { getMission } from "@/lib/missions";
-import { rulesReply, systemPrompt, userTurn, type TutorRequest, type TutorResponse } from "@/lib/engine/tutor";
+import { rulesReply, sandboxRulesReply, sandboxSystemPrompt, systemPrompt, userTurn, type TutorRequest, type TutorResponse } from "@/lib/engine/tutor";
+import { getSandbox } from "@/lib/sandbox";
 
 const MODEL = process.env.MIKHYAL_TUTOR_MODEL || "claude-opus-5-5";
 
@@ -12,10 +13,20 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
-  const mission = getMission(body.missionId);
-  if (!mission) return NextResponse.json({ error: "unknown mission" }, { status: 404 });
-
-  const fallback = rulesReply(mission, body);
+  let system: string;
+  let fallback: TutorResponse;
+  if (body.sandboxId) {
+    const sandbox = getSandbox(body.sandboxId);
+    const level = sandbox?.levels.find((l) => l.id === body.levelId);
+    if (!sandbox || !level) return NextResponse.json({ error: "unknown sandbox level" }, { status: 404 });
+    system = sandboxSystemPrompt(sandbox, level);
+    fallback = sandboxRulesReply(level, body);
+  } else {
+    const mission = getMission(body.missionId ?? "");
+    if (!mission) return NextResponse.json({ error: "unknown mission" }, { status: 404 });
+    system = systemPrompt(mission);
+    fallback = rulesReply(mission, body);
+  }
   if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json(fallback);
 
   try {
@@ -33,7 +44,7 @@ export async function POST(request: Request) {
         output_config: { effort: "low" },
         betas: ["server-side-fallback-2026-07-01"],
         fallbacks: "default",
-        system: systemPrompt(mission),
+        system,
         messages: [...history, { role: "user", content: userTurn(body) }],
       },
       { timeout: 20_000 },

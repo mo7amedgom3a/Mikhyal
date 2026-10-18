@@ -153,6 +153,7 @@ export const statics: Mission = {
     apply: ["$\\sin 20^\\circ \\approx 0.342$", "$2T\\sin 20^\\circ = 600$", "$T = \\dfrac{600}{0.684}$"],
   },
   reflection: {
+    sandbox: "forces",
     summary: "اكتشفت شرط الاتزان: المحصلة صفر ومثلث القوى مقفول، وإن $T = \\frac{W}{2\\sin\\theta}$ — الكابلات الأفقية خطيرة لأن الشد بيكبر جدًا.",
     nextMissionId: "moments",
   },

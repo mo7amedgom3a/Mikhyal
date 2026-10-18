@@ -10,6 +10,7 @@ import {
   FlaskConical,
   Gauge,
   PenTool,
+  Puzzle,
   ShieldCheck,
   Sigma,
   Sparkles,
@@ -159,6 +160,27 @@ export default function Home() {
                 </TiltCard>
               ))}
             </div>
+          </section>
+
+          {/* Playground teaser */}
+          <section className="px-4 pb-24">
+            <Link
+              data-reveal
+              href="/play"
+              className="group mx-auto flex max-w-[1100px] flex-col items-center gap-6 rounded-[24px] border-2 border-amber bg-amber-soft p-8 text-center outline-none transition-transform hover:-translate-y-1 focus-visible:ring-[3px] focus-visible:ring-ring/40 md:flex-row md:text-start"
+            >
+              <span className="grid size-20 shrink-0 place-items-center rounded-[22px] bg-amber text-ink shadow-[0_6px_0_0_var(--brand-insight-dark)]">
+                <Puzzle className="size-10" aria-hidden />
+              </span>
+              <div className="flex-1 space-y-2">
+                <p className="text-sm font-bold text-amber-dark">جديد · ملعب التجارب</p>
+                <h2 className="font-display text-3xl font-extrabold text-ink">ابني الدايرة بإيدك… واللمبات تنوّر قدامك</h2>
+                <p className="text-ink-2">اسحب البطاريات واللمبات والأسلاك والمفاتيح، أو وازن القوى على حلقة — كل تعديل بيتحسب لحظيًا، والأهداف بتتعلّم عليها ✓ أول ما تحققها.</p>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-[14px] bg-primary px-5 py-3 font-bold text-white shadow-[0_4px_0_0_var(--brand-primary-edge)]">
+                ادخل الملعب <ArrowLeft className="size-5" />
+              </span>
+            </Link>
           </section>
 
           {/* Two modes */}

@@ -35,6 +35,21 @@ Each mission also has an **Exam mode**: timed questions in the style of the curr
 | 🎢 Balance the seesaw | drag people along the beam; torque bars | m₁d₁ = m₂d₂ |
 | 📦 When does the box slide? | drag the ramp; free-body diagram | μ = tanθ |
 
+## Playground: Brilliant-style sandboxes (`/play`)
+
+Constructive puzzles with no Run button. The student builds, a deterministic solver re-evaluates on every edit, and goals tick ✓ live. Levels are progressive, and the tutor reads the live board.
+
+- **Circuit Builder** (`/play/circuits`, 7 levels):
+  - Drag batteries, bulbs, wires, resistors and switches from a tray onto a dotted grid. Tapping and full keyboard control also work.
+  - Modified Nodal Analysis (`lib/sandbox/circuit/solver.ts`) drives bulb glow, current-flow animation and short-circuit detection.
+  - Levels cover closing the loop, series, parallel, choosing branches, switches, and a bypass puzzle where one wire darkens two inner bulbs.
+- **Force Table** (`/play/forces`, 5 levels): drag force vectors on a ring (Mafs) until the resultant vanishes. The head-to-tail force polygon closes at equilibrium. Levels cover equal and opposite forces, perpendicular forces, three forces at 120°, Lami's theorem, and limited forces.
+- **Shared engine:**
+  - `lib/sandbox/types.ts`, `useSandbox.ts`: undo/redo (drags coalesce into one step), live goal checks, local progress, learner-model credit.
+  - `components/sandbox/SandboxShell.tsx`: level rail, goals, hints, AI tutor, celebration.
+  - A new sandbox only needs a model, a solver, a board and levels.
+- Missions link to their related sandbox from the reflection step: Ohm's law → circuits; vectors and statics → force table.
+
 ## The reactive learning engine
 
 ```
