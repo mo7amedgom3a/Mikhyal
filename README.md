@@ -60,6 +60,7 @@ Next action ── hint · question · contrasting experiment · remediation · 
 | Procedural | Method hint |
 | Transfer | Same principle in a new setting |
 
+- **LaTeX and complex equations.** Students type equations in a visual math editor ([MathLive](https://mathlive.io)) with a palette for fractions, roots, powers, subscripts, Greek letters, trig/log functions and degrees, or switch to a LaTeX/text box. `lib/engine/latex.ts` converts LaTeX (`\frac`, `\sqrt[n]{}`, `\left(…\right)`, `t_{0}`, `\theta`, `\sin 30^\circ`, …) and Unicode math (`²`, `√`, `π`, `t₀`, `×`, `½`, Arabic digits) into expressions the checker grades. Numeric answers accept `3\times10^{8}\,\text{m/s}`, `\frac{400}{60} m/s^2` or `2.2 μs`, and the app shows how each input was read before grading. Any text that embeds `$…$` or `$$…$$` (mission content, feedback, exam explanations, tutor replies) renders with KaTeX.
 - **The Problem Solver Framework** scaffolding fades from full to partial to none as mastery grows.
 - **AI tutor** (`app/api/tutor/route.ts`): a Socratic tutor in Egyptian Arabic, grounded on each mission's verified relation and the current workspace state. It uses Claude through `@anthropic-ai/sdk` (default model `claude-opus-5-5`, low effort, server-side refusal fallback). It is called only for free-text questions or deeper hints. Without an API key, or on any error, the deterministic rules engine answers instead.
 

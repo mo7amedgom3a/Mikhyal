@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { MathText } from "@/components/ui/MathText";
 
 interface Answer {
   qid: string;
@@ -88,7 +89,9 @@ export function ExamMode({ mission, onAnswer }: { mission: Mission; onAnswer: (c
             const a = answers[i];
             return (
               <div key={q.id} className={`rounded-[16px] border-2 p-4 ${a?.correct ? "border-mint bg-mint-soft" : "border-border bg-surface"}`}>
-                <p className="font-semibold text-ink">{q.question}</p>
+                <p className="font-semibold text-ink">
+                  <MathText>{q.question}</MathText>
+                </p>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-2">
                   {a ? (
                     a.correct ? (
@@ -97,7 +100,7 @@ export function ExamMode({ mission, onAnswer }: { mission: Mission; onAnswer: (c
                       </>
                     ) : (
                       <>
-                        <CircleX className="size-4 text-destructive" aria-hidden /> اخترت: <bdi>{q.options.find((o) => o.id === a.choiceId)?.label ?? "—"}</bdi>
+                        <CircleX className="size-4 text-destructive" aria-hidden /> اخترت: <MathText>{q.options.find((o) => o.id === a.choiceId)?.label ?? "—"}</MathText>
                       </>
                     )
                   ) : (
@@ -108,11 +111,11 @@ export function ExamMode({ mission, onAnswer }: { mission: Mission; onAnswer: (c
                 </p>
                 {a && !a.correct && a.rule && (
                   <p className="mt-2 rounded-[12px] bg-amber-soft p-2 text-sm text-ink">
-                    <b>خطأ {ERROR_LABELS[a.rule.errorType]}:</b> {a.rule.prompt}
+                    <b>خطأ {ERROR_LABELS[a.rule.errorType]}:</b> <MathText>{a.rule.prompt}</MathText>
                   </p>
                 )}
                 <p className="mt-2 text-sm text-ink-2">
-                  <b>الحل:</b> <bdi>{q.explanation}</bdi>
+                  <b>الحل:</b> <MathText>{q.explanation}</MathText>
                 </p>
               </div>
             );
@@ -144,11 +147,13 @@ export function ExamMode({ mission, onAnswer }: { mission: Mission; onAnswer: (c
           </Badge>
         </div>
         <Progress value={(left / timeLimitSec) * 100} indicatorClassName={left < 30 ? "bg-destructive" : "bg-amber"} aria-label="الوقت المتبقي" />
-        <h3 className="text-xl font-bold leading-9 text-ink">{q.question}</h3>
+        <h3 className="text-xl font-bold leading-9 text-ink">
+          <MathText>{q.question}</MathText>
+        </h3>
         <ToggleGroup type="single" value={picked} onValueChange={setPicked} className="sm:grid-cols-2" aria-label="الاختيارات">
           {q.options.map((o) => (
             <ToggleGroupItem key={o.id} value={o.id} className="justify-start text-lg">
-              <bdi>{o.label}</bdi>
+              <MathText>{o.label}</MathText>
             </ToggleGroupItem>
           ))}
         </ToggleGroup>

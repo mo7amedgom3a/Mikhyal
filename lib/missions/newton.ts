@@ -72,7 +72,7 @@ export const newton: Mission = {
     },
   },
   discovery: {
-    prompt: "من تجاربك: العجلة بتزيد مع القوة وبتقل مع الكتلة. اكتب العلاقة بين a و F و m.",
+    prompt: "من تجاربك: العجلة بتزيد مع القوة وبتقل مع الكتلة. اكتب العلاقة بين $a$ و $F$ و $m$.",
     variables: { a: "العجلة", F: "محصلة القوة", m: "الكتلة" },
     targets: [{ variable: "a", expr: "F / m" }],
     domain: { F: [100, 5000], m: [10, 4000], a: [0.1, 10] },
@@ -127,9 +127,9 @@ export const newton: Mission = {
     solver: {
       understand: "صاروخ طالع لفوق، عليه قوة دفع. المطلوب العجلة.",
       represent: "ارسم سهم الدفع 12 N لفوق وسهم الوزن mg لتحت.",
-      model: "قانون نيوتن الثاني على المحصلة: F_net = ma.",
-      translate: "F_net = 12 − 0.5 × 9.8 = 7.1 N  ⇒  a = F_net ÷ m",
-      verify: "الوحدة N/kg = m/s² . لو مكانش في وزن كانت هتبقى 24 — منطقي إن الإجابة أقل.",
+      model: "قانون نيوتن الثاني على المحصلة: $\\sum F = ma$.",
+      translate: "$F_{net} = 12 - 0.5 \\times 9.8 = 7.1\\,\\mathrm{N} \;\\Rightarrow\; a = \\dfrac{F_{net}}{m}$",
+      verify: "الوحدة $\\mathrm{N/kg} = \\mathrm{m/s^2}$ ✓ — لو مكانش في وزن كانت هتبقى 24، فمنطقي إن الإجابة أقل.",
     },
     solution: "a = \\dfrac{12 - 0.5 \\times 9.8}{0.5} = 14.2\\ \\text{m/s}^2",
   },
@@ -146,7 +146,7 @@ export const newton: Mission = {
           { id: "d", label: "16 m/s²" },
         ],
         correctId: "a",
-        explanation: "a = F/m = 20/4 = 5 m/s²",
+        explanation: "$a = \\dfrac{F}{m} = \\dfrac{20}{4} = 5\\,\\mathrm{m/s^2}$",
         rules: [
           { choiceId: "b", ruleId: "nq1-Fm", errorType: "conceptual", prompt: "ضربت القوة في الكتلة؛ العجلة بتقل مع الكتلة." },
           { choiceId: "c", ruleId: "nq1-mF", errorType: "mathematical", prompt: "قسمت الكتلة على القوة — النسبة مقلوبة." },
@@ -163,7 +163,7 @@ export const newton: Mission = {
           { id: "d", label: "تساوي وزنه" },
         ],
         correctId: "a",
-        explanation: "سرعة ثابتة ⇒ a = 0 ⇒ F_net = ma = 0 (قانون نيوتن الأول).",
+        explanation: "سرعة ثابتة يعني $a = 0$، إذن $\\sum F = ma = 0$ (قانون نيوتن الأول).",
         rules: [
           { choiceId: "b", ruleId: "nq2-motion-needs-force", errorType: "conceptual", prompt: "الحركة بسرعة ثابتة مش محتاجة محصلة قوة — القوة بتغيّر السرعة." },
           { choiceId: "c", ruleId: "nq2-opposite", errorType: "conceptual", prompt: "لو المحصلة عكس الحركة، السرعة هتقل. هل السرعة بتتغير؟" },
@@ -176,11 +176,11 @@ export const newton: Mission = {
     predict: ["تخيّل إنك بتزق عربية سوبر ماركت فاضية وبعدين مليانة بنفس القوة."],
     experiment: [
       "ثبّت القوة على أقصى قيمة (3000 N) وزوّد الكتلة تدريجيًا.",
-      "المسافة في 4 ثواني = ½ × a × 16. عشان توصل 10 m محتاج a ≥ 1.25 m/s².",
+      "المسافة في 4 ثواني: $x = \\tfrac{1}{2} a t^2 = 8a$. عشان توصل 10 m محتاج $a \\ge 1.25\\,\\mathrm{m/s^2}$.",
       "جرّب كتلة حوالي 2400 kg",
     ],
-    discover: ["العجلة بتزيد مع القوة.", "العجلة بتقل لما الكتلة تزيد.", "a = ؟ ÷ ؟"],
-    apply: ["في قوتين على الصاروخ مش واحدة.", "الوزن = m × g لتحت.", "المحصلة = الدفع − الوزن، وبعدين اقسم على الكتلة."],
+    discover: ["العجلة بتزيد مع القوة.", "العجلة بتقل لما الكتلة تزيد.", "$a = \\dfrac{?}{?}$"],
+    apply: ["في قوتين على الصاروخ مش واحدة.", "الوزن $W = mg$ لتحت.", "المحصلة = الدفع − الوزن، وبعدين اقسم على الكتلة."],
   },
   reflection: {
     summary: "اكتشفت إن العجلة بتتناسب طرديًا مع محصلة القوة وعكسيًا مع الكتلة: F = ma — وإن المهم هو المحصلة مش قوة واحدة.",

@@ -31,7 +31,7 @@ export const circular: Mission = {
         choiceId: "double",
         ruleId: "circ-linear",
         errorType: "conceptual",
-        prompt: "جرّب في المعمل: v = 10 ثم v = 20 بنفس نصف القطر، وقارن قراءة العجلة المركزية.",
+        prompt: "جرّب في المعمل: $v = 10$ ثم $v = 20$ بنفس نصف القطر، وقارن قراءة العجلة المركزية.",
       },
       {
         choiceId: "same",
@@ -75,7 +75,7 @@ export const circular: Mission = {
     },
   },
   discovery: {
-    prompt: "من القراءات: العجلة المركزية بتزيد بسرعة مع v وبتقل لما المنحنى يوسع. اكتب العلاقة بين a و v و r.",
+    prompt: "من القراءات: العجلة المركزية بتزيد بسرعة مع v وبتقل لما المنحنى يوسع. اكتب العلاقة بين $a$ و $v$ و $r$.",
     variables: { a: "العجلة المركزية", v: "السرعة", r: "نصف القطر" },
     targets: [{ variable: "a", expr: "v^2 / r" }],
     domain: { v: [1, 40], r: [5, 200], a: [0.1, 50] },
@@ -91,7 +91,7 @@ export const circular: Mission = {
         relation: { variable: "a", expr: "v / r" },
         ruleId: "circ-a-vr",
         errorType: "mathematical",
-        prompt: "لما ضاعفت السرعة في التجربة، العجلة زادت ضعف ولا 4 أضعاف؟ والوحدة: (m/s) ÷ m = 1/s مش m/s².",
+        prompt: "لما ضاعفت السرعة في التجربة، العجلة زادت ضعف ولا 4 أضعاف؟ والوحدة: $\\dfrac{\\mathrm{m/s}}{\\mathrm{m}} = \\mathrm{s^{-1}}$ مش $\\mathrm{m/s^2}$.",
       },
       {
         relation: { variable: "a", expr: "v^2 * r" },
@@ -113,9 +113,9 @@ export const circular: Mission = {
     solver: {
       understand: "حركة دائرية منتظمة. المطلوب العجلة المركزية.",
       represent: "ارسم الدائرة، سهم السرعة مماس، وسهم العجلة لجوه ناحية المركز.",
-      model: "عجلة مركزية: a = v² ÷ r.",
-      translate: "a = 12² ÷ 8",
-      verify: "الوحدة m²/s² ÷ m = m/s² . 18 m/s² تقريبًا ضعف g — لعبة ملاهي مثيرة!",
+      model: "عجلة مركزية: $a_c = \\dfrac{v^2}{r}$.",
+      translate: "$a_c = \\dfrac{12^2}{8}$",
+      verify: "الوحدة $\\dfrac{\\mathrm{m^2/s^2}}{\\mathrm{m}} = \\mathrm{m/s^2}$ ✓ — و $18\\,\\mathrm{m/s^2} \\approx 2g$، لعبة ملاهي مثيرة!",
     },
     solution: "a_c = \\dfrac{12^2}{8} = 18\\ \\text{m/s}^2",
   },
@@ -149,10 +149,10 @@ export const circular: Mission = {
           { id: "d", label: "400 m/s²" },
         ],
         correctId: "a",
-        explanation: "a = v²/r = 400/100 = 4 m/s²",
+        explanation: "$a_c = \\dfrac{v^2}{r} = \\dfrac{400}{100} = 4\\,\\mathrm{m/s^2}$",
         rules: [
           { choiceId: "b", ruleId: "cq2-vr", errorType: "mathematical", prompt: "نسيت تربيع السرعة." },
-          { choiceId: "c", ruleId: "cq2-2r", errorType: "mathematical", prompt: "قسمت على 2r؟ العلاقة v²/r من غير 2." },
+          { choiceId: "c", ruleId: "cq2-2r", errorType: "mathematical", prompt: "قسمت على $2r$؟ العلاقة $\\frac{v^2}{r}$ من غير 2." },
           { choiceId: "d", ruleId: "cq2-nodiv", errorType: "procedural", prompt: "ربّعت السرعة بس ماقسمتش على نصف القطر." },
         ],
       },
@@ -165,11 +165,11 @@ export const circular: Mission = {
       "قارن «العجلة المطلوبة» بـ «أقصى عجلة يوفرها الاحتكاك».",
       "السرعة الآمنة القصوى قريبة من 15.5 m/s",
     ],
-    discover: ["ضاعف v وشوف العجلة اتضربت في كام.", "ضاعف r وشوف العجلة حصلها إيه.", "a = v^? ÷ ?"],
-    apply: ["العلاقة نفسها اللي اكتشفتها.", "ربّع السرعة الأول.", "a = 144 ÷ 8"],
+    discover: ["ضاعف v وشوف العجلة اتضربت في كام.", "ضاعف r وشوف العجلة حصلها إيه.", "$a = \\dfrac{v^{?}}{?}$"],
+    apply: ["العلاقة نفسها اللي اكتشفتها.", "ربّع السرعة الأول.", "$a = \\dfrac{144}{8}$"],
   },
   reflection: {
-    summary: "اكتشفت إن العجلة المركزية a = v²/r ناحية المركز، وإن الاحتكاك هو اللي بيوفرها: v_max = √(μgr).",
+    summary: "اكتشفت إن العجلة المركزية $a_c = \\frac{v^2}{r}$ ناحية المركز، وإن الاحتكاك هو اللي بيوفرها: $v_{max} = \\sqrt{\\mu g r}$.",
     nextMissionId: "ohm",
   },
 };

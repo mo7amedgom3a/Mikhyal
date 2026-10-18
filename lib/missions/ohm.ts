@@ -66,7 +66,7 @@ export const ohm: Mission = {
     },
   },
   discovery: {
-    prompt: "التيار زاد لما زودت الجهد، وقلّ لما زودت المقاومة. اكتب العلاقة بين I و V و R.",
+    prompt: "التيار زاد لما زودت الجهد، وقلّ لما زودت المقاومة. اكتب العلاقة بين $I$ و $V$ و $R$.",
     variables: { I: "شدة التيار", V: "فرق الجهد", R: "المقاومة" },
     targets: [{ variable: "I", expr: "V / R" }],
     domain: { V: [1, 240], R: [1, 100], I: [0.1, 10] },
@@ -100,14 +100,14 @@ export const ohm: Mission = {
     unitHint: "مثال: 15 ohm",
     wrongValues: [
       { value: 2200, ruleId: "heater-VI", errorType: "mathematical", prompt: "ضربت الجهد في التيار — ده بيدي القدرة (W) مش المقاومة." },
-      { value: 0.04545, ruleId: "heater-IV", errorType: "mathematical", prompt: "النسبة مقلوبة: R = V ÷ I." },
+      { value: 0.04545, ruleId: "heater-IV", errorType: "mathematical", prompt: "النسبة مقلوبة: $R = \\frac{V}{I}$." },
     ],
     solver: {
       understand: "جهد ثابت 220 V وتيار أقصى 10 A. المطلوب أقل مقاومة.",
       represent: "دايرة بسيطة: مصدر — فيوز — مقاومة السخان.",
       model: "قانون أوم: V = IR. أقل R تقابل أكبر تيار مسموح.",
-      translate: "R_min = V ÷ I_max",
-      verify: "V/A = Ω . نفس فكرة اللمبة: 12 ÷ 2 = 6.",
+      translate: "$R_{min} = \\dfrac{V}{I_{max}}$",
+      verify: "$\\mathrm{V/A} = \\Omega$ ✓ — نفس فكرة اللمبة: $\\frac{12}{2} = 6\\,\\Omega$.",
     },
     solution: "R_{min} = \\dfrac{220}{10} = 22\\ \\Omega",
   },
@@ -124,7 +124,7 @@ export const ohm: Mission = {
           { id: "d", label: "16 A" },
         ],
         correctId: "a",
-        explanation: "I = V/R = 12/4 = 3 A",
+        explanation: "$I = \\dfrac{V}{R} = \\dfrac{12}{4} = 3\\,\\mathrm{A}$",
         rules: [
           { choiceId: "b", ruleId: "oq1-VR", errorType: "conceptual", prompt: "ضربت V في R؛ المقاومة بتقلل التيار." },
           { choiceId: "c", ruleId: "oq1-RV", errorType: "mathematical", prompt: "قسمت R على V — مقلوبة." },
@@ -153,11 +153,11 @@ export const ohm: Mission = {
   hints: {
     predict: ["تخيل المقاومة زي ضيق في ماسورة مية: كل ما تضيق، المية بتعدي أكتر ولا أقل؟"],
     experiment: ["سيب V = 12 وقلّل R خطوة خطوة وراقب الأميتر.", "الفيوز بيضرب لما I > 2 A.", "جرّب R = 6 Ω"],
-    discover: ["ضاعف V: التيار حصله إيه؟", "ضاعف R: التيار حصله إيه؟", "I = ؟ ÷ ؟"],
-    apply: ["نفس فكرة الفيوز في اللمبة.", "أقل مقاومة ⇔ أكبر تيار مسموح.", "R = V ÷ I"],
+    discover: ["ضاعف V: التيار حصله إيه؟", "ضاعف R: التيار حصله إيه؟", "$I = \\dfrac{?}{?}$"],
+    apply: ["نفس فكرة الفيوز في اللمبة.", "أقل مقاومة ⇔ أكبر تيار مسموح.", "$R = \\dfrac{V}{I}$"],
   },
   reflection: {
-    summary: "اكتشفت قانون أوم V = IR، وإن الفيوز بيحدد أقل مقاومة آمنة R = V ÷ I_max.",
+    summary: "اكتشفت قانون أوم $V = IR$، وإن الفيوز بيحدد أقل مقاومة آمنة $R_{min} = \\frac{V}{I_{max}}$.",
     nextMissionId: "fountain",
   },
 };

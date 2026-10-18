@@ -28,6 +28,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { MathText } from "@/components/ui/MathText";
 import {
   ArrowLeft,
   Bot,
@@ -355,10 +356,10 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
 
                 {step === "challenge" && (
                   <div className="space-y-3">
-                    <p className="text-[18px] leading-9 text-ink">{mission.challenge.story}</p>
+                    <p className="text-[18px] leading-9 text-ink"><MathText>{mission.challenge.story}</MathText></p>
                     <Alert variant="primary">
                       <Target />
-                      <AlertDescription className="text-[17px] font-semibold leading-8 text-primary">{mission.challenge.goal}</AlertDescription>
+                      <AlertDescription className="text-[17px] font-semibold leading-8 text-primary"><MathText>{mission.challenge.goal}</MathText></AlertDescription>
                     </Alert>
                     <p className="text-sm text-ink-3">قبل أي قانون، هنفكر ونجرّب بنفسنا.</p>
                   </div>
@@ -366,7 +367,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
 
                 {step === "predict" && (
                   <div className="space-y-3">
-                    <p className="text-[18px] leading-9 text-ink">{mission.prediction.question}</p>
+                    <p className="text-[18px] leading-9 text-ink"><MathText>{mission.prediction.question}</MathText></p>
                     <ToggleGroup
                       type="single"
                       value={choice ?? ""}
@@ -382,7 +383,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
                           className={predictionLocked && o.id === mission.prediction.correctId ? "border-mint bg-mint-soft text-mint-dark data-[state=on]:border-mint data-[state=on]:bg-mint-soft data-[state=on]:text-mint-dark" : ""}
                         >
                           {predictionLocked && o.id === mission.prediction.correctId && <Check />}
-                          {o.label}
+                          <MathText>{o.label}</MathText>
                         </ToggleGroupItem>
                       ))}
                     </ToggleGroup>
@@ -396,14 +397,14 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
 
                 {step === "experiment" && (
                   <div className="space-y-3">
-                    <p className="text-[17px] leading-8 text-ink">{mission.experiment.instruction}</p>
+                    <p className="text-[17px] leading-8 text-ink"><MathText>{mission.experiment.instruction}</MathText></p>
                     {runs.length >= 4 && !expSuccess && <p className="text-sm text-ink-3">تقدر تكمّل، بس حاول توصل للهدف الأول.</p>}
                   </div>
                 )}
 
                 {step === "discover" && (
                   <div className="space-y-3">
-                    <p className="text-[17px] leading-8 text-ink">{mission.discovery.prompt}</p>
+                    <p className="text-[17px] leading-8 text-ink"><MathText>{mission.discovery.prompt}</MathText></p>
                     {!eqSolved && !revealed ? (
                       <EquationInput value={equation} onChange={setEquation} onSubmit={submitEquation} variables={mission.discovery.variables} />
                     ) : (
@@ -424,7 +425,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
 
                 {step === "apply" && (
                   <div className="space-y-4">
-                    <p className="rounded-[14px] border-2 border-border bg-muted p-4 text-[18px] leading-9 text-ink">{mission.application.problem}</p>
+                    <p className="rounded-[14px] border-2 border-border bg-muted p-4 text-[18px] leading-9 text-ink"><MathText>{mission.application.problem}</MathText></p>
                     <NumericInput value={numeric} onChange={setNumeric} onSubmit={submitNumeric} placeholder={mission.application.unitHint} disabled={numSolved} />
                     {(numSolved || revealed) && (
                       <div className="rounded-[14px] bg-sim p-3 text-lg">
@@ -450,7 +451,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
                     </div>
                     <Alert variant="mint">
                       <CircleCheck />
-                      <AlertDescription className="text-[17px] leading-8 text-ink">{mission.reflection.summary}</AlertDescription>
+                      <AlertDescription className="text-[17px] leading-8 text-ink"><MathText>{mission.reflection.summary}</MathText></AlertDescription>
                     </Alert>
                     {sessionErrors.length > 0 ? (
                       <Alert variant="amber">
@@ -460,7 +461,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
                           <ul className="space-y-1 text-sm">
                             {[...new Map(sessionErrors.map((d) => [d.ruleId, d])).values()].slice(0, 4).map((d) => (
                               <li key={d.ruleId}>
-                                <b>{ERROR_LABELS[d.errorType]}:</b> {d.prompt}
+                                <b>{ERROR_LABELS[d.errorType]}:</b> <MathText>{d.prompt}</MathText>
                               </li>
                             ))}
                           </ul>

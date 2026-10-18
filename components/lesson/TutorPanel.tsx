@@ -4,6 +4,7 @@ import { Bot, Cog, Lightbulb, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { MathText } from "@/components/ui/MathText";
 
 export interface TutorMessage {
   role: "student" | "tutor";
@@ -66,7 +67,7 @@ export function TutorPanel({
                   m.role === "student" ? "border-primary bg-primary text-white" : "border-border bg-surface text-ink"
                 }`}
               >
-                {m.text}
+                <MathText>{m.text}</MathText>
                 {m.role === "tutor" && m.source && (
                   <span className="mt-1 flex items-center gap-1 text-[11px] text-ink-3">
                     {m.source === "llm" ? <Sparkles className="size-3" aria-hidden /> : <Cog className="size-3" aria-hidden />}

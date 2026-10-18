@@ -8,3 +8,4 @@ next-env.d.ts
 manim/media/
 __pycache__/
 .venv/
+public/mathlive/

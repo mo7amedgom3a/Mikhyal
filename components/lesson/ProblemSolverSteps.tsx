@@ -4,6 +4,7 @@ import type { Scaffold } from "@/lib/engine/pedagogy";
 import type { SolverPrompts } from "@/lib/engine/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MathText } from "@/components/ui/MathText";
 
 export const SOLVER_STEPS = [
   { key: "understand", title: "افهم الموقف", q: "إيه اللي بيحصل؟ والمطلوب إيه؟", icon: BookOpenCheck },
@@ -40,7 +41,9 @@ export function ProblemSolverSteps({ prompts, scaffold }: { prompts: SolverPromp
                 <span className="block text-sm font-normal text-ink-3">{s.q}</span>
               </span>
             </AccordionTrigger>
-            <AccordionContent>{prompts[s.key]}</AccordionContent>
+            <AccordionContent>
+              <MathText>{prompts[s.key]}</MathText>
+            </AccordionContent>
           </AccordionItem>
         );
       })}

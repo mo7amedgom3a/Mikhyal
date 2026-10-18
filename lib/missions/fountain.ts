@@ -12,7 +12,7 @@ export const fountain: Mission = {
   groundTruth:
     "Quadratic y = ax^2 + bx + c (a<0 opens down). Vertex x = -b/(2a), y = c - b^2/(4a). Roots via quadratic formula. Challenge: nozzle at origin (c=0), land at x=4, peak height 2 → a = -0.5, b = 2.",
   challenge: {
-    story: "بنصمم نافورة في ميدان. المية بتطلع من فوهة على الأرض عند x = 0، ومسارها y = ax² + bx + c.",
+    story: "بنصمم نافورة في ميدان. المية بتطلع من فوهة على الأرض عند x = 0، ومسارها $y = ax^2 + bx + c$.",
     goal: "لازم المية تنزل جوه الحوض عند x = 4 m، وأعلى نقطة تكون 2 m بالظبط عشان ماتطرطش على الناس.",
   },
   prediction: {
@@ -24,7 +24,7 @@ export const fountain: Mission = {
       { id: "none", label: "مش هتتغير" },
     ],
     correctId: "upforward",
-    reveal: "الرأس عند x = −b/2a و y = −b²/4a: زيادة b بتزوّد الاتنين.",
+    reveal: "الرأس عند $x = -\\frac{b}{2a}$ و $y = -\\frac{b^2}{4a}$: زيادة $b$ بتزوّد الاتنين.",
     rules: [
       {
         choiceId: "up",
@@ -61,7 +61,7 @@ export const fountain: Mission = {
     },
   },
   discovery: {
-    prompt: "لاحظت إن الرأس دايمًا في نص المسافة بين الجذرين. لو c = 0، الجذور 0 و −b/a. اكتب الإحداثي الأفقي للرأس h بدلالة a و b.",
+    prompt: "لاحظت إن الرأس دايمًا في نص المسافة بين الجذرين. لو $c = 0$، الجذور $0$ و $-\\frac{b}{a}$. اكتب الإحداثي الأفقي للرأس $h$ بدلالة $a$ و $b$.",
     variables: { h: "الإحداثي x للرأس", a: "المعامل a", b: "المعامل b" },
     targets: [{ variable: "h", expr: "-b / (2*a)" }],
     domain: { a: [-3, -0.2], b: [0.5, 5], h: [0.1, 10] },
@@ -95,7 +95,7 @@ export const fountain: Mission = {
     },
   },
   application: {
-    problem: "كورة اتشاطت ومسارها y = −0.25x² + 3x (بالمتر). أقصى ارتفاع هتوصله الكورة قد إيه؟",
+    problem: "كورة اتشاطت ومسارها $y = -0.25x^2 + 3x$ (بالمتر). أقصى ارتفاع هتوصله الكورة قد إيه؟",
     answer: { value: 9, unit: "m", tolerance: 0.02 },
     unitHint: "مثال: 4 m",
     wrongValues: [
@@ -105,9 +105,9 @@ export const fountain: Mission = {
     solver: {
       understand: "مسار تربيعي مفتوح لتحت. المطلوب أقصى ارتفاع = y للرأس.",
       represent: "ارسم القطع المكافئ: يبدأ من 0 ويرجع للأرض، والرأس في النص.",
-      model: "رأس الدالة التربيعية: h = −b ÷ 2a ثم k = y(h).",
-      translate: "h = −3 ÷ (2 × −0.25) = 6  ⇒  k = −0.25(36) + 3(6)",
-      verify: "الرأس في نص المسافة بين الجذرين 0 و 12 .",
+      model: "رأس الدالة التربيعية: $h = -\\dfrac{b}{2a}$ ثم $k = y(h)$.",
+      translate: "$h = -\\dfrac{3}{2(-0.25)} = 6 \;\\Rightarrow\; k = -0.25(6)^2 + 3(6)$",
+      verify: "الرأس في نص المسافة بين الجذرين $0$ و $12$ ✓.",
     },
     solution: "h = 6,\\quad k = -0.25(6)^2 + 3(6) = 9\\ \\text{m}",
   },
@@ -116,7 +116,7 @@ export const fountain: Mission = {
     questions: [
       {
         id: "f-q1",
-        question: "إحداثيات رأس منحنى الدالة y = x² − 6x + 5 هي:",
+        question: "إحداثيات رأس منحنى الدالة $y = x^2 - 6x + 5$ هي:",
         options: [
           { id: "a", label: "(3, −4)" },
           { id: "b", label: "(−3, 32)" },
@@ -124,16 +124,16 @@ export const fountain: Mission = {
           { id: "d", label: "(1, 0)" },
         ],
         correctId: "a",
-        explanation: "h = 6/2 = 3، k = 9 − 18 + 5 = −4",
+        explanation: "$h = -\\dfrac{-6}{2} = 3,\\quad k = 9 - 18 + 5 = -4$",
         rules: [
-          { choiceId: "b", ruleId: "fq1-sign", errorType: "mathematical", prompt: "h = −b/2a = −(−6)/2 = +3. راجع الإشارة." },
+          { choiceId: "b", ruleId: "fq1-sign", errorType: "mathematical", prompt: "$h = -\\frac{b}{2a} = -\\frac{(-6)}{2} = +3$. راجع الإشارة." },
           { choiceId: "c", ruleId: "fq1-coeffs", errorType: "procedural", prompt: "الرأس مش (−b, c)؛ استخدم h = −b/2a." },
           { choiceId: "d", ruleId: "fq1-root", errorType: "conceptual", prompt: "(1, 0) جذر، مش الرأس." },
         ],
       },
       {
         id: "f-q2",
-        question: "عدد الجذور الحقيقية للمعادلة x² + 2x + 5 = 0 هو:",
+        question: "عدد الجذور الحقيقية للمعادلة $x^2 + 2x + 5 = 0$ هو:",
         options: [
           { id: "a", label: "لا يوجد جذور حقيقية" },
           { id: "b", label: "جذران" },
@@ -141,7 +141,7 @@ export const fountain: Mission = {
           { id: "d", label: "5 جذور" },
         ],
         correctId: "a",
-        explanation: "المميز b² − 4ac = 4 − 20 = −16 < 0",
+        explanation: "المميز $\\Delta = b^2 - 4ac = 4 - 20 = -16 < 0$",
         rules: [
           { choiceId: "b", ruleId: "fq2-always-two", errorType: "conceptual", prompt: "مش كل معادلة تربيعية ليها جذرين حقيقيين — احسب المميز." },
           { choiceId: "c", ruleId: "fq2-one", errorType: "mathematical", prompt: "جذر واحد لما المميز = صفر بالظبط. احسبه." },
@@ -154,11 +154,11 @@ export const fountain: Mission = {
     predict: ["b بتتحكم في ميل المية وهي طالعة من الفوهة."],
     experiment: [
       "ابدأ بـ c = 0. مكان النزول = −b/a — خليه 4.",
-      "أقصى ارتفاع = −b²/4a. خليه 2.",
+      "أقصى ارتفاع $= -\\frac{b^2}{4a}$. خليه 2.",
       "جرّب a = −0.5 و b = 2",
     ],
-    discover: ["الرأس في نص المسافة بين الجذرين.", "الجذرين 0 و −b/a.", "h = (0 + (−b/a)) ÷ 2"],
-    apply: ["احسب h الأول.", "عوّض h في المعادلة عشان تطلع الارتفاع.", "k = y(6)"],
+    discover: ["الرأس في نص المسافة بين الجذرين.", "الجذرين $0$ و $-\\frac{b}{a}$.", "$h = \\dfrac{0 + \\left(-\\frac{b}{a}\\right)}{2}$"],
+    apply: ["احسب h الأول.", "عوّض h في المعادلة عشان تطلع الارتفاع.", "$k = y(6)$"],
   },
   reflection: {
     summary: "اكتشفت إن رأس القطع المكافئ في نص المسافة بين الجذرين: h = −b/2a، وإن الجذور هي أماكن نزول المسار.",

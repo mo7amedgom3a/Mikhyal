@@ -10,25 +10,27 @@ import type {
   NumericTarget,
   WrongValueRule,
 } from "./types";
+import { latexToMath } from "./latex";
 
 const math = create(all, {});
 
-const FUNCTIONS = new Set(["sqrt", "sin", "cos", "tan", "abs", "exp", "log", "pi"]);
+/** Names that are functions or constants, never student variables. */
+const FUNCTIONS = new Set([
+  "sqrt", "nthRoot", "abs", "exp", "log", "log10",
+  "sin", "cos", "tan", "cot", "sec", "csc", "asin", "acos", "atan", "sinh", "cosh", "tanh",
+  "pi", "e", "deg", "Infinity",
+]);
 
-/** Normalize common student notation: ², ×, ÷, Arabic digits, Δ, implicit products like "2as". */
+/**
+ * Normalize what students type — LaTeX (\frac, \sqrt, \theta, t_{0}), Unicode (², √, π, ×, t₀),
+ * Arabic digits — into mathjs syntax, and split glued products like "2as" into known variables.
+ * Δ is dropped so Δt and t name the same quantity.
+ */
 export function normalizeExpression(raw: string, knownVars: string[]): string {
-  let s = raw
-    .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
-    .replace(/²/g, "^2")
-    .replace(/³/g, "^3")
-    .replace(/[×·]/g, "*")
-    .replace(/÷/g, "/")
-    .replace(/−/g, "-")
-    .replace(/√/g, "sqrt")
-    .replace(/Δ/g, "");
-  // Split glued identifiers ("2as", "uv") into known variables.
+  let s = latexToMath(raw).replace(/Δ/g, "");
+  // Split glued identifiers ("2as", "uv", "μmg") into known variables.
   const vars = [...knownVars].sort((a, b) => b.length - a.length);
-  s = s.replace(/[A-Za-z_][A-Za-z0-9_]*/g, (raw) => {
+  s = s.replace(/[A-Za-z_\u0370-\u03FF][A-Za-z0-9_\u0370-\u03FF]*/g, (raw) => {
     const id = raw.replace(/_/g, "");
     if (FUNCTIONS.has(id) || knownVars.includes(id)) return id;
     const parts: string[] = [];
@@ -158,7 +160,8 @@ export function checkEquation(
   },
 ): EquationResult {
   const defaultLhs = opts.targets[0].variable;
-  const eq = parseEquation(input, opts.variables, defaultLhs);
+  // Forbidden symbols (e.g. t in the braking mission) must still split out of "ut" so they can be diagnosed.
+  const eq = parseEquation(input, [...opts.variables, ...Object.keys(opts.forbiddenSymbols)], defaultLhs);
   if (!eq) return { status: "parse_error" };
 
   for (const sym of eq.symbols) {
@@ -200,17 +203,59 @@ export function normalizeUnit(u: string): string {
     .trim()
     .replace(/²/g, "^2")
     .replace(/³/g, "^3")
-    .replace(/μ|µ/g, "u")
+    .replace(/[μµ]\s*/g, "u")
+    .replace(/\s*\^\s*/g, "^")
     .replace(/Ω|ohms?/gi, "ohm")
     .replace(/([a-zA-Z])(\d)\b/g, "$1^$2")
     .replace(/\s+/g, " ");
 }
 
+/** Split "3*10^8 m/s" or "((400)/(60)) m/s^2" into its numeric expression and its unit. */
+function splitQuantity(s: string): [string, string] {
+  let i = 0;
+  while (i < s.length) {
+    const rest = s.slice(i);
+    const word = rest.match(/^[A-Za-z\u0370-\u03FF]+/);
+    if (word) {
+      if (["sqrt", "nthRoot", "pi"].includes(word[0])) {
+        i += word[0].length;
+        continue;
+      }
+      // scientific notation: 3e8, 1.2E-3
+      if (/^e[-+]?\d/i.test(rest) && /\d/.test(s[i - 1] ?? "")) {
+        i += 1;
+        continue;
+      }
+      break;
+    }
+    if (/[0-9.+\-*/^()\s,]/.test(s[i])) {
+      i++;
+      continue;
+    }
+    break;
+  }
+  let num = s.slice(0, i);
+  let unit = s.slice(i);
+  while (/[(*\s]$/.test(num) && num.length) {
+    if (num.endsWith("(")) unit = "(" + unit;
+    num = num.slice(0, -1);
+  }
+  return [num.trim(), unit.trim()];
+}
+
+/** Accepts plain numbers, LaTeX (6.67\,\text{m/s}^2, \frac{400}{60}), and 3×10^8 notation. */
 export function parseQuantity(raw: string): { value: number; unit: string } | null {
-  const s = raw.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/٫/g, ".").trim();
-  const m = s.match(/^([-+]?\d*\.?\d+(?:e[-+]?\d+)?)\s*(.*)$/i);
-  if (!m) return null;
-  return { value: parseFloat(m[1]), unit: normalizeUnit(m[2]) };
+  const s = latexToMath(raw);
+  const [num, unit] = splitQuantity(s);
+  if (!num || !/\d/.test(num)) return null;
+  let value: number;
+  try {
+    value = Number(math.evaluate(num));
+  } catch {
+    return null;
+  }
+  if (!Number.isFinite(value)) return null;
+  return { value, unit: normalizeUnit(unit) };
 }
 
 const near = (a: number, b: number, tol: number) =>

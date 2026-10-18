@@ -4,6 +4,7 @@ import { ERROR_LABELS } from "@/lib/engine/pedagogy";
 import type { ErrorType } from "@/lib/engine/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { MathText } from "@/components/ui/MathText";
 
 const STYLE: Record<ActionKind, { variant: "mint" | "amber" | "primary"; icon: LucideIcon; title: string }> = {
   advance: { variant: "mint", icon: Sparkles, title: "اكتشاف!" },
@@ -23,7 +24,7 @@ export function FeedbackPanel({ kind, message, errorType }: { kind: ActionKind; 
         {s.title}
         {errorType && <Badge className="text-xs">نوع الخطأ: {ERROR_LABELS[errorType]}</Badge>}
       </AlertTitle>
-      <AlertDescription className="text-[17px] leading-8 text-ink">{message}</AlertDescription>
+      <AlertDescription className="text-[17px] leading-8 text-ink"><MathText>{message}</MathText></AlertDescription>
     </Alert>
   );
 }

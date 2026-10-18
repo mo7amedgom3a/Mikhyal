@@ -71,7 +71,7 @@ export const relativity: Mission = {
     },
   },
   discovery: {
-    prompt: "اكتب العلاقة بين زمن الأرض t وزمن السفينة t0 وسرعة السفينة v وسرعة الضوء c. (تلميح: المعامل بيبقى ∞ لما v = c)",
+    prompt: "اكتب العلاقة بين زمن الأرض $t$ وزمن السفينة $t_0$ وسرعة السفينة $v$ وسرعة الضوء $c$. (تلميح: المعامل بيبقى $\\infty$ لما $v = c$)",
     variables: { t: "الزمن على الأرض", t0: "الزمن على السفينة", v: "سرعة السفينة", c: "سرعة الضوء" },
     targets: [{ variable: "t", expr: "t0 / sqrt(1 - v^2/c^2)" }],
     domain: { t0: [1, 10], c: [2, 4], v: [0.1, 1.5], t: [1, 20] },
@@ -96,7 +96,13 @@ export const relativity: Mission = {
         prompt: "قربت! جرّب عند v = 0.5c: علاقتك تدي 2 بس التجربة قالت 1.15. فين التربيع والجذر؟",
       },
     ],
-    forbiddenSymbols: {},
+    forbiddenSymbols: {
+      γ: {
+        ruleId: "rel-uses-gamma",
+        errorType: "representational",
+        prompt: "صح إن الزمن بيتضرب في γ! بس γ نفسها اختصار. اكتبها بدلالة v و c: γ = ؟",
+      },
+    },
   },
   application: {
     problem: "جسيم الميون عمره وهو ساكن 2.2 ميكروثانية. لو بيتحرك بسرعة 0.98c، عمره هيبان قد إيه لمراقب في المعمل؟",
@@ -104,14 +110,14 @@ export const relativity: Mission = {
     unitHint: "مثال: 5 us (ميكروثانية)",
     wrongValues: [
       { value: 0.4378, ruleId: "muon-inverted", errorType: "conceptual", prompt: "الميون المتحرك بيعيش أطول في نظر المعمل، مش أقصر." },
-      { value: 110, ruleId: "muon-linear", errorType: "mathematical", prompt: "استخدمت 1 − v/c بدل √(1 − v²/c²)." },
+      { value: 110, ruleId: "muon-linear", errorType: "mathematical", prompt: "استخدمت $1 - \\frac{v}{c}$ بدل $\\sqrt{1 - \\frac{v^2}{c^2}}$." },
     ],
     solver: {
       understand: "الزمن الذاتي 2.2 μs (في إطار الميون). المطلوب الزمن في إطار المعمل.",
       represent: "ساعة مع الميون (Δt₀) وساعة في المعمل (Δt).",
       model: "تمدد الزمن: Δt = γ Δt₀.",
-      translate: "γ = 1 ÷ √(1 − 0.98²) ≈ 5.03",
-      verify: "Δt أكبر من Δt₀ (الساعة المتحركة أبطأ).",
+      translate: "$\\gamma = \\dfrac{1}{\\sqrt{1 - 0.98^2}} \\approx 5.03$",
+      verify: "$\\Delta t > \\Delta t_0$ ✓ (الساعة المتحركة أبطأ).",
     },
     solution: "\\Delta t = \\dfrac{2.2}{\\sqrt{1 - 0.98^2}} \\approx 11.06\\ \\mu\\text{s}",
   },
@@ -128,9 +134,9 @@ export const relativity: Mission = {
           { id: "d", label: "2.5" },
         ],
         correctId: "a",
-        explanation: "γ = 1/√(1 − 0.36) = 1/0.8 = 1.25",
+        explanation: "$\\gamma = \\dfrac{1}{\\sqrt{1 - 0.6^2}} = \\dfrac{1}{0.8} = 1.25$",
         rules: [
-          { choiceId: "b", ruleId: "rq1-sqrt", errorType: "mathematical", prompt: "0.8 هي √(1 − β²)، و γ مقلوبها." },
+          { choiceId: "b", ruleId: "rq1-sqrt", errorType: "mathematical", prompt: "$0.8 = \\sqrt{1 - \\beta^2}$، و $\\gamma$ مقلوبها." },
           { choiceId: "c", ruleId: "rq1-sum", errorType: "mathematical", prompt: "γ مش 1 + β." },
           { choiceId: "d", ruleId: "rq1-linear", errorType: "mathematical", prompt: "دي 1/(1 − β) — نسيت التربيع والجذر." },
         ],
@@ -158,13 +164,13 @@ export const relativity: Mission = {
     predict: ["السرعات العادية مش بتعمل أي فرق ملحوظ في الزمن. 0.5c سريعة، بس هل كفاية؟"],
     experiment: ["زوّد β تدريجيًا وبص على منحنى γ.", "محتاج γ = 2.", "جرّب β ≈ 0.866"],
     discover: [
-      "زمن الأرض = γ × زمن السفينة.",
+      "زمن الأرض $= \\gamma \\times$ زمن السفينة.",
       "γ بيبقى 1 لما v = 0 وبيروح لـ ∞ لما v → c.",
-      "γ = 1 ÷ √(1 − v²/c²)",
+      "$\\gamma = \\dfrac{1}{\\sqrt{1 - \\frac{v^2}{c^2}}}$",
     ],
-    apply: ["العمر 2.2 μs هو الزمن الذاتي Δt₀.", "احسب γ عند 0.98c.", "Δt = γ × 2.2"],
+    apply: ["العمر $2.2\\,\\mu\\mathrm{s}$ هو الزمن الذاتي $\\Delta t_0$.", "احسب $\\gamma$ عند $0.98c$.", "$\\Delta t = \\gamma \\times 2.2$"],
   },
   reflection: {
-    summary: "اكتشفت إن الزمن نسبي: الساعة المتحركة بتبطأ بمعامل γ = 1/√(1 − v²/c²)، والتأثير بيبان قرب سرعة الضوء.",
+    summary: "اكتشفت إن الزمن نسبي: الساعة المتحركة بتبطأ بمعامل $\\gamma = \\frac{1}{\\sqrt{1 - v^2/c^2}}$، والتأثير بيبان قرب سرعة الضوء.",
   },
 };

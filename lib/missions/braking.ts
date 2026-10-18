@@ -79,7 +79,7 @@ export const braking: Mission = {
   },
   discovery: {
     prompt:
-      "التجربة ورّتنا إن السرعة بتقل أثناء الفرملة. اكتب علاقة تربط السرعة الابتدائية u والنهائية v والتباطؤ a والمسافة s — من غير الزمن.",
+      "التجربة ورّتنا إن السرعة بتقل أثناء الفرملة. اكتب علاقة تربط السرعة الابتدائية $u$ والنهائية $v$ والتباطؤ $a$ والمسافة $s$ — من غير الزمن $t$.",
     variables: { v: "السرعة النهائية", u: "السرعة الابتدائية", a: "مقدار التباطؤ", s: "المسافة" },
     targets: [
       { variable: "s", expr: "(u^2 - v^2) / (2*a)" },
@@ -99,14 +99,14 @@ export const braking: Mission = {
         relation: { variable: "s", expr: "(u^2 - v^2) / a" },
         ruleId: "braking-missing-2",
         errorType: "mathematical",
-        prompt: "قربت جدًا! راجع المعامل: لما تحسب المسافة من متوسط السرعة (u+v)/2، الـ 2 بتروح فين؟",
+        prompt: "قربت جدًا! راجع المعامل: لما تحسب المسافة من متوسط السرعة $\\frac{u+v}{2}$، الـ 2 بتروح فين؟",
       },
       {
         relation: { variable: "v", expr: "u - a*s" },
         ruleId: "braking-s-for-t",
         errorType: "procedural",
         prompt:
-          "دي شكل v = u − at بس حطيت s مكان t. راجع الوحدات: a×s وحدتها m²/s² مش m/s. محتاج تربيع في مكان ما…",
+          "دي شكل $v = u - at$ بس حطيت $s$ مكان $t$. راجع الوحدات: $a \\times s$ وحدتها $\\mathrm{m^2/s^2}$ مش $\\mathrm{m/s}$. محتاج تربيع في مكان ما…",
       },
     ],
     forbiddenSymbols: {
@@ -128,13 +128,13 @@ export const braking: Mission = {
         value: 360,
         ruleId: "train-missing-2",
         errorType: "mathematical",
-        prompt: "الرقم ضعف الإجابة. راجع المقام: s = u² ÷ (؟ × a).",
+        prompt: "الرقم ضعف الإجابة. راجع المقام: $s = \\dfrac{u^2}{?\\times a}$.",
       },
       {
         value: 12,
         ruleId: "train-time-not-distance",
         errorType: "procedural",
-        prompt: "12 دي الزمن اللي القطر بياخده عشان يقف (u ÷ a)، مش المسافة. المطلوب إيه بالظبط؟",
+        prompt: "12 دي الزمن اللي القطر بياخده عشان يقف ($t = \\frac{u}{a}$)، مش المسافة. المطلوب إيه بالظبط؟",
       },
       {
         value: 75,
@@ -147,8 +147,8 @@ export const braking: Mission = {
       understand: "القطر بيبدأ بسرعة 30 م/ث وبيقف (v = 0). المطلوب المسافة s.",
       represent: "ارسم خط: u = 30 → v = 0، وسهم التباطؤ عكس الحركة.",
       model: "حركة بعجلة منتظمة، ومش عندنا زمن → نستخدم معادلة من غير t.",
-      translate: "0 = u² − 2as  ⇒  s = u² ÷ 2a",
-      verify: "الوحدة: (m/s)² ÷ (m/s²) = m . 180 متر منطقي لقطر سريع؟",
+      translate: "$0 = u^2 - 2as \;\\Rightarrow\; s = \\dfrac{u^2}{2a}$",
+      verify: "الوحدة: $\\dfrac{(\\mathrm{m/s})^2}{\\mathrm{m/s^2}} = \\mathrm{m}$ ✓ — و 180 متر منطقي لقطر سريع؟",
     },
     solution: "s = \\dfrac{u^2}{2a} = \\dfrac{30^2}{2 \\times 2.5} = 180\\,\\text{m}",
   },
@@ -166,7 +166,7 @@ export const braking: Mission = {
           { id: "d", label: "1.8 m/s²" },
         ],
         correctId: "a",
-        explanation: "72 km/h = 20 m/s ⇒ a = u²/2s = 400/80 = 5 m/s²",
+        explanation: "$72\\,\\mathrm{km/h} = 20\\,\\mathrm{m/s} \\Rightarrow a = \\dfrac{u^2}{2s} = \\dfrac{400}{80} = 5\\,\\mathrm{m/s^2}$",
         rules: [
           { choiceId: "b", ruleId: "bq1-missing-2", errorType: "mathematical", prompt: "نسيت المعامل 2 في 2as." },
           { choiceId: "c", ruleId: "bq1-units", errorType: "procedural", prompt: "لازم تحوّل km/h إلى m/s الأول (÷ 3.6)." },
@@ -184,7 +184,7 @@ export const braking: Mission = {
           { id: "d", label: "1 : 1" },
         ],
         correctId: "a",
-        explanation: "s = u²/2a ⇒ s تتناسب عكسيًا مع a ⇒ sA : sB = 1 : 2",
+        explanation: "$s = \\dfrac{u^2}{2a}$ يعني $s \\propto \\dfrac{1}{a}$، إذن $s_A : s_B = 1 : 2$",
         rules: [
           { choiceId: "b", ruleId: "bq2-direct", errorType: "conceptual", prompt: "تباطؤ أكبر يعني فرامل أقوى — المسافة تزيد ولا تقل؟" },
           { choiceId: "c", ruleId: "bq2-square", errorType: "mathematical", prompt: "التربيع على السرعة u مش على a." },
@@ -203,13 +203,13 @@ export const braking: Mission = {
     discover: [
       "محتاجين علاقة فيها v و u و a و s بس — من غير زمن.",
       "ابدأ من v = u − at وإن المسافة = متوسط السرعة × الزمن، واحذف t.",
-      "الصيغة شكلها v² = u² − ?·a·s",
+      "الصيغة شكلها $v^2 = u^2 - \\square\\, a s$",
     ],
-    apply: ["القطر في الآخر وقف، يعني v = 0.", "عوّض في v² = u² − 2as وطلّع s.", "s = u² ÷ (2a)"],
+    apply: ["القطر في الآخر وقف، يعني v = 0.", "عوّض في $v^2 = u^2 - 2as$ وطلّع $s$.", "$s = \\dfrac{u^2}{2a}$"],
   },
   reflection: {
     summary:
-      "اكتشفت إن مسافة الوقوف بتتناسب مع مربع السرعة، وإن لما الزمن مش معروف بنستخدم v² = u² − 2as.",
+      "اكتشفت إن مسافة الوقوف بتتناسب مع مربع السرعة، وإن لما الزمن مش معروف بنستخدم $v^2 = u^2 - 2as$.",
     nextMissionId: "newton",
   },
 };
