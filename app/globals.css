@@ -146,3 +146,18 @@
   visibility: hidden;
   animation: motion-fallback 0s 3s forwards;
 }
+
+/* Mafs sets its theme on .MafsView, so brand it there (light, Mikhyal palette). */
+.mafs-mikhyal .MafsView {
+  --mafs-bg: var(--surface-simulation);
+  --mafs-fg: var(--foreground);
+  --mafs-origin-color: var(--text-secondary);
+  --mafs-line-color: #dfe3f0;
+  --grid-line-subdivision-color: #eceff7;
+  --mafs-blue: var(--brand-primary);
+  --mafs-green: var(--brand-discovery);
+  --mafs-orange: var(--brand-insight);
+  --mafs-red: var(--danger);
+  --mafs-violet: var(--brand-primary-hover);
+  font-family: var(--font-latin);
+}

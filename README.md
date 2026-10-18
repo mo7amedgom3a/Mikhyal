@@ -19,7 +19,7 @@ Each mission also has an **Exam mode**: timed questions in the style of the curr
 
 - **Landing page** (`/`): positioning, a live braking demo in the hero, the learning loop, the AI tutor, a comparison with traditional platforms, missions, the Discovery and Exam modes, the Problem Solver Framework, the engine, teachers, pricing (early-access hypothesis) and a waitlist. The waitlist only saves to localStorage for now.
 - **Learning path** (`/learn`): mission cards with mastery rings and a map of the student's error types.
-- **Six missions** (`/learn/[id]`):
+- **Eleven missions** (`/learn/[id]`) in physics, math, and applied math (statics):
 
 | Mission | Simulation | Student discovers |
 |---|---|---|
@@ -29,6 +29,11 @@ Each mission also has an **Exam mode**: timed questions in the style of the curr
 | 💡 Light the lamp without blowing the fuse | live circuit, ammeter, fuse | I = V/R |
 | ⛲ Fountain trajectory | parabola with roots and vertex | h = −b/2a |
 | 🚀 Space twins (enrichment) | dilated clocks + γ(β) curve | Δt = γΔt₀ |
+| 📐 Measure the Cairo Tower | drag the observer and the line of sight | h = d·tanθ |
+| ➡️ Two tugboats in the Suez Canal | drag force vectors on a Mafs plane (parallelogram rule) | R = √(F₁² + F₂² + 2F₁F₂cosθ) |
+| ⚖️ Hang the shop sign | drag cable anchors; live triangle of forces | T = W / (2 sinθ) |
+| 🎢 Balance the seesaw | drag people along the beam; torque bars | m₁d₁ = m₂d₂ |
+| 📦 When does the box slide? | drag the ramp; free-body diagram | μ = tanθ |
 
 ## The reactive learning engine
 
@@ -66,7 +71,7 @@ Next action ── hint · question · contrasting experiment · remediation · 
 
 ## Stack
 
-Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui (Radix) · lucide icons · GSAP + ScrollTrigger · SVG simulations · Math.js (expressions and units) · KaTeX · Anthropic SDK · Vitest · Manim (offline clips).
+Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui (Radix) · lucide icons · GSAP + ScrollTrigger · Mafs + @use-gesture (draggable vectors and handles) · SVG simulations · Math.js (expressions and units) · KaTeX · Anthropic SDK · Vitest · Manim (offline clips).
 
 UI components live in `components/ui/` as shadcn source (`components.json` is set up, so `npx shadcn add <component>` works). Landing-page motion lives in `components/landing/motion/`: a hero word reveal with floating formula chips and pointer parallax, a scroll-drawn learning-loop timeline, a replayed tutor chat, an engine "event packet" loop, tilt cards and a reading-progress bar. All of it respects `prefers-reduced-motion`.
 

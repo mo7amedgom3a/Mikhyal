@@ -5,8 +5,13 @@ import { circular } from "./circular";
 import { ohm } from "./ohm";
 import { fountain } from "./fountain";
 import { relativity } from "./relativity";
+import { elevation } from "./elevation";
+import { vectors } from "./vectors";
+import { statics } from "./statics";
+import { moments } from "./moments";
+import { incline } from "./incline";
 
-export const MISSIONS: Mission[] = [braking, newton, circular, ohm, fountain, relativity].sort(
+export const MISSIONS: Mission[] = [braking, newton, circular, ohm, fountain, relativity, elevation, vectors, statics, moments, incline].sort(
   (a, b) => a.order - b.order,
 );
 

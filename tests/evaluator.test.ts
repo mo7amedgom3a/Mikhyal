@@ -49,6 +49,11 @@ describe("checkEquation", () => {
       ohm: "V = I R",
       fountain: "h = -b/(2a)",
       relativity: "t = t0/sqrt(1 - v^2/c^2)",
+      elevation: "h = d tan(θ)",
+      vectors: "R = sqrt(F1^2 + F2^2 + 2 F1 F2 cos(θ))",
+      statics: "2 T sin(θ) = W",
+      moments: "m1 d1 = m2 d2",
+      incline: "μ = tan(θ)",
     };
     for (const m of MISSIONS) expect(checkEquation(canon[m.id], eqOpts(m.id)).status, m.id).toBe("correct");
   });
@@ -101,6 +106,11 @@ describe("mission experiments", () => {
       ohm: { V: 12, R: 6 },
       fountain: { a: -0.5, b: 2, c: 0 },
       relativity: { beta: 0.865, t0: 1 },
+      elevation: { d: 187, theta: 45 },
+      vectors: { F1: 6, a1: 33.5, F2: 6, a2: 33.5 },
+      statics: { theta: 30 },
+      moments: { m1: 40, d1: 2.4, m2: 60, d2: 1.6 },
+      incline: { theta: 21.5, mu: 0.4, m: 5 },
     };
     for (const m of MISSIONS) expect(m.experiment.evaluate(winning[m.id]).success, m.id).toBe(true);
   });

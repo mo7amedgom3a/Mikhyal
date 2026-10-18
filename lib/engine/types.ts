@@ -91,7 +91,12 @@ export type SimId =
   | "circular"
   | "ohm"
   | "relativity"
-  | "fountain";
+  | "fountain"
+  | "elevation"
+  | "vectors"
+  | "statics"
+  | "moments"
+  | "incline";
 
 export interface SolverPrompts {
   understand: string;
@@ -112,7 +117,7 @@ export interface ExamQuestion {
 
 export interface Mission {
   id: string;
-  subject: "physics" | "math";
+  subject: "physics" | "math" | "applied";
   order: number;
   title: string;
   tagline: string;

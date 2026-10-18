@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Atom, Check, Compass, Sigma, Sparkles } from "lucide-react";
+import { ArrowLeft, Atom, Check, Compass, Scale, Sigma, Sparkles } from "lucide-react";
 import { MISSIONS } from "@/lib/missions";
 import { MissionIcon } from "@/lib/missions/icons";
 import { emptyState, loadState, missionMastery, type LearnerState } from "@/lib/engine/learnerModel";
@@ -23,6 +23,7 @@ export function LearningPath() {
   const groups = [
     { title: "فيزياء", subject: "physics" as const, icon: Atom },
     { title: "رياضيات", subject: "math" as const, icon: Sigma },
+    { title: "رياضيات تطبيقية (استاتيكا)", subject: "applied" as const, icon: Scale },
   ];
 
   return (

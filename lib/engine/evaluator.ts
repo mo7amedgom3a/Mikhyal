@@ -26,22 +26,46 @@ const FUNCTIONS = new Set([
  * Arabic digits — into mathjs syntax, and split glued products like "2as" into known variables.
  * Δ is dropped so Δt and t name the same quantity.
  */
+/** Functions that take an argument (as opposed to constants like pi or units like deg). */
+const CALLABLE = ["sqrt", "abs", "exp", "log", "log10", "sin", "cos", "tan", "cot", "sec", "csc", "asin", "acos", "atan", "sinh", "cosh", "tanh"];
+
+/** Greek letters spelled out in ASCII by students typing on a plain keyboard. */
+const GREEK_WORDS: Record<string, string> = {
+  theta: "θ", alpha: "α", beta: "β", gamma: "γ", lambda: "λ", mu: "μ", omega: "ω", phi: "φ", rho: "ρ", sigma: "σ", tau: "τ",
+};
+
 export function normalizeExpression(raw: string, knownVars: string[]): string {
   let s = latexToMath(raw).replace(/Δ/g, "");
-  // Split glued identifiers ("2as", "uv", "μmg") into known variables.
+  s = s.replace(/(?<![A-Za-z])(theta|alpha|beta|gamma|lambda|mu|omega|phi|rho|sigma|tau)(?![A-Za-z])/g, (w) => GREEK_WORDS[w]);
+  // "sin θ", "cos 30" → sin(θ), cos(30): mathjs needs parentheses for calls.
+  const fnRe = new RegExp(`(?<![A-Za-z])(${CALLABLE.join("|")})\\s+([A-Za-z\\u0370-\\u03FF][A-Za-z0-9_\\u0370-\\u03FF]*|\\d+(?:\\.\\d+)?)`, "g");
+  s = s.replace(fnRe, "$1($2)");
+  // Split glued identifiers ("2as", "uv", "μmg", "F1F2cos", "sinθ") into known variables and functions.
   const vars = [...knownVars].sort((a, b) => b.length - a.length);
+  const pieces = [...vars, ...CALLABLE].sort((a, b) => b.length - a.length);
   s = s.replace(/[A-Za-z_\u0370-\u03FF][A-Za-z0-9_\u0370-\u03FF]*/g, (raw) => {
     const id = raw.replace(/_/g, "");
     if (FUNCTIONS.has(id) || knownVars.includes(id)) return id;
     const parts: string[] = [];
     let rest = id;
     while (rest.length) {
-      const v = vars.find((k) => rest.startsWith(k));
+      const v = pieces.find((k) => rest.startsWith(k));
       if (!v) return id;
       parts.push(v);
       rest = rest.slice(v.length);
     }
-    return parts.join("*");
+    // A function glued to the variable after it is a call: sinθ → sin(θ); a trailing function keeps its "(…)".
+    const out: string[] = [];
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (CALLABLE.includes(part) && i + 1 < parts.length) {
+        out.push(`${part}(${parts[i + 1]})`);
+        i++;
+      } else {
+        out.push(part);
+      }
+    }
+    return out.join("*");
   });
   return s;
 }

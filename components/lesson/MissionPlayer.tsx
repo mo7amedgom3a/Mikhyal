@@ -8,6 +8,7 @@ import { decideNext, nextHint, shouldUseLLM, solverScaffold, ERROR_LABELS, type 
 import { emptyState, loadState, missionMastery, recordEvent, recordEvidence, saveState, type LearnerState } from "@/lib/engine/learnerModel";
 import type { TutorRequest, TutorResponse } from "@/lib/engine/tutor";
 import { SIMS } from "@/components/sims";
+import { snapToParam } from "@/components/sims/useSimClock";
 import { Logo } from "@/components/ui/Logo";
 import { Tex } from "@/components/ui/Tex";
 import { LessonProgress, STEP_LABELS } from "./LessonProgress";
@@ -155,7 +156,9 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
     setRunKey(0);
   };
   const setParam = (k: string, v: number) => {
-    setParams((p) => ({ ...p, [k]: v }));
+    const spec = mission.experiment.params.find((p) => p.key === k);
+    const value = spec ? snapToParam(v, spec) : v;
+    setParams((p) => (p[k] === value ? p : { ...p, [k]: value }));
     resetRun();
   };
 
@@ -514,7 +517,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
             {showSim ? (
               <>
                 <Card className="overflow-hidden" dir="ltr">
-                  <Sim params={params} runKey={runKey} onFinish={onRunFinished} />
+                  <Sim params={params} runKey={runKey} onFinish={onRunFinished} setParam={simInteractive ? setParam : undefined} />
                 </Card>
                 {simInteractive && (
                   <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
@@ -541,7 +544,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
                       {runKey > 0 && !simRunning && (
                         <Alert variant={outcome.success ? "mint" : "default"} role="status" className="pop-in">
                           {outcome.success ? <CircleCheck /> : <TriangleAlert className="text-amber-dark" />}
-                          <AlertDescription className={`font-semibold ${outcome.success ? "text-mint-dark" : "text-ink"}`}>{outcome.message}</AlertDescription>
+                          <AlertDescription className={`font-semibold ${outcome.success ? "text-mint-dark" : "text-ink"}`}><MathText>{outcome.message}</MathText></AlertDescription>
                         </Alert>
                       )}
                     </div>

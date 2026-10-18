@@ -62,4 +62,13 @@ export interface SimProps {
   params: Record<string, number>;
   runKey: number;
   onFinish: () => void;
+  /** Direct manipulation: dragging a handle sets the same params the sliders control (clamped and snapped). */
+  setParam?: (key: string, value: number) => void;
+}
+
+/** Snap a dragged value to a slider's step and range so drag and slider always agree. */
+export function snapToParam(value: number, spec: { min: number; max: number; step: number }): number {
+  const snapped = Math.round((value - spec.min) / spec.step) * spec.step + spec.min;
+  const clamped = Math.min(spec.max, Math.max(spec.min, snapped));
+  return Number(clamped.toFixed(6));
 }
