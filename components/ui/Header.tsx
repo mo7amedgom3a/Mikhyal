@@ -1,25 +1,29 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Logo } from "./Logo";
 
 export function Header({ cta = true }: { cta?: boolean }) {
   return (
-    <header className="sticky top-0 z-30 border-b-2 border-line bg-surface/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b-2 border-border bg-surface/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4">
         <Logo />
-        <nav className="flex items-center gap-2 sm:gap-4">
-          <Link href="/#how" className="hidden text-sm font-semibold text-ink-2 hover:text-primary sm:inline">
-            إزاي بنتعلم
-          </Link>
-          <Link href="/#missions" className="hidden text-sm font-semibold text-ink-2 hover:text-primary sm:inline">
-            المهمات
-          </Link>
-          <Link href="/#pricing" className="hidden text-sm font-semibold text-ink-2 hover:text-primary md:inline">
-            الأسعار
-          </Link>
+        <nav className="flex items-center gap-1 sm:gap-2">
+          {[
+            ["/#how", "إزاي بنتعلم", "hidden sm:inline-flex"],
+            ["/#missions", "المهمات", "hidden sm:inline-flex"],
+            ["/#pricing", "الأسعار", "hidden md:inline-flex"],
+          ].map(([href, label, cls]) => (
+            <Button key={href} asChild variant="ghost" size="sm" className={cls}>
+              <Link href={href}>{label}</Link>
+            </Button>
+          ))}
           {cta && (
-            <Link href="/learn" className="btn btn-primary !min-h-10 !px-4 text-sm">
-              جرّب مجانًا
-            </Link>
+            <Button asChild size="sm">
+              <Link href="/learn">
+                جرّب مجانًا <ArrowLeft />
+              </Link>
+            </Button>
           )}
         </nav>
       </div>

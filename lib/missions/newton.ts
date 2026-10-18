@@ -10,7 +10,7 @@ export const newton: Mission = {
   order: 2,
   title: "اسحب أتقل حمولة بقوة محدودة",
   tagline: "قانون نيوتن الثاني · القوة والكتلة والعجلة",
-  icon: "🚚",
+  icon: "Truck",
   concepts: ["dynamics.newton2", "dynamics.netforce"],
   groundTruth:
     "Newton's second law: a = F_net / m. Challenge: winch max 3000 N, must move a load 10 m from rest in 4 s on a smooth surface → a = 2d/t^2 = 1.25 m/s^2 → m_max = 2400 kg. Heavier objects do NOT accelerate faster under the same force.",
@@ -65,10 +65,10 @@ export const newton: Mission = {
         { label: "المسافة في 4 ث", value: d.toFixed(1), unit: "m" },
       ];
       if (d < TARGET_D)
-        return { success: false, message: "⏱️ العربية ماوصلتش للخط في الوقت. الحمولة تقيلة على القوة دي.", readouts };
+        return { success: false, message: "العربية ماوصلتش للخط في الوقت. الحمولة تقيلة على القوة دي.", readouts };
       if (m < 2300)
-        return { success: false, message: "✅ وصلت! بس تقدر تشد حمولة أتقل من كده؟", readouts };
-      return { success: true, message: "🎯 أقصى حمولة تقريبًا 2400 kg بقوة 3000 N. ممتاز!", readouts };
+        return { success: false, message: "وصلت! بس تقدر تشد حمولة أتقل من كده؟", readouts };
+      return { success: true, message: "أقصى حمولة تقريبًا 2400 kg بقوة 3000 N. ممتاز!", readouts };
     },
   },
   discovery: {
@@ -129,7 +129,7 @@ export const newton: Mission = {
       represent: "ارسم سهم الدفع 12 N لفوق وسهم الوزن mg لتحت.",
       model: "قانون نيوتن الثاني على المحصلة: F_net = ma.",
       translate: "F_net = 12 − 0.5 × 9.8 = 7.1 N  ⇒  a = F_net ÷ m",
-      verify: "الوحدة N/kg = m/s² ✓. لو مكانش في وزن كانت هتبقى 24 — منطقي إن الإجابة أقل.",
+      verify: "الوحدة N/kg = m/s² . لو مكانش في وزن كانت هتبقى 24 — منطقي إن الإجابة أقل.",
     },
     solution: "a = \\dfrac{12 - 0.5 \\times 9.8}{0.5} = 14.2\\ \\text{m/s}^2",
   },

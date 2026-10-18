@@ -1,4 +1,5 @@
 "use client";
+import { Zap } from "lucide-react";
 import { stateAt, stoppingTime } from "@/lib/physics/braking";
 import { useSimClock, type SimProps } from "./useSimClock";
 
@@ -67,9 +68,7 @@ export function BrakingSim({ params, runKey, onFinish }: SimProps) {
         </g>
       )}
       {crashed && (
-        <text x={front + 8} y="95" fontSize="28">
-          💥
-        </text>
+        <Zap x={front + 4} y={70} width={30} height={30} color="var(--danger)" fill="var(--brand-insight)" strokeWidth={2} aria-label="اصطدام" />
       )}
       <g fontFamily="var(--font-latin)" fontSize="15" fill="var(--foreground)">
         <text x="20" y="32" fontWeight="700">t = {t.toFixed(2)} s</text>

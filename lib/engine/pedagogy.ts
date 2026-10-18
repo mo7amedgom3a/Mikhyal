@@ -16,11 +16,11 @@ export interface NextAction {
 }
 
 const INTERVENTION: Record<ErrorType, { kind: ActionKind; lead: string }> = {
-  conceptual: { kind: "experiment", lead: "🔬 جرّب تجربة مقارنة: " },
-  mathematical: { kind: "question", lead: "🧮 راجع الخطوة دي: " },
-  representational: { kind: "remediation", lead: "✏️ خلينا نرسمها تاني: " },
-  procedural: { kind: "hint", lead: "🧭 فكّر في الطريقة: " },
-  transfer: { kind: "remediation", lead: "🔁 نفس الفكرة في موقف جديد: " },
+  conceptual: { kind: "experiment", lead: "جرّب تجربة مقارنة: " },
+  mathematical: { kind: "question", lead: "راجع الخطوة دي: " },
+  representational: { kind: "remediation", lead: "خلينا نرسمها تاني: " },
+  procedural: { kind: "hint", lead: "فكّر في الطريقة: " },
+  transfer: { kind: "remediation", lead: "نفس الفكرة في موقف جديد: " },
 };
 
 export const ERROR_LABELS: Record<ErrorType, string> = {
@@ -40,7 +40,7 @@ export function decideNext(input: {
 }): NextAction {
   const { correct, diagnosis, attempts, hintLevel, hints } = input;
   if (correct) {
-    return { kind: "advance", message: "برافو! كده انت وصلت للفكرة بنفسك ✨", hintLevel, reveal: false };
+    return { kind: "advance", message: "برافو! كده انت وصلت للفكرة بنفسك.", hintLevel, reveal: false };
   }
   if (diagnosis) {
     const iv = INTERVENTION[diagnosis.errorType];

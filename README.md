@@ -65,7 +65,9 @@ Next action ── hint · question · contrasting experiment · remediation · 
 
 ## Stack
 
-Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · SVG simulations · Math.js (expressions and units) · KaTeX · Anthropic SDK · Vitest · Manim (offline clips).
+Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui (Radix) · lucide icons · GSAP + ScrollTrigger · SVG simulations · Math.js (expressions and units) · KaTeX · Anthropic SDK · Vitest · Manim (offline clips).
+
+UI components live in `components/ui/` as shadcn source (`components.json` is set up, so `npx shadcn add <component>` works). Landing-page motion lives in `components/landing/motion/`: a hero word reveal with floating formula chips and pointer parallax, a scroll-drawn learning-loop timeline, a replayed tutor chat, an engine "event packet" loop, tilt cards and a reading-progress bar. All of it respects `prefers-reduced-motion`.
 
 Design follows the *Playful Scientific Minimalism* system: Electric Indigo `#5146E8`, Discovery Mint `#12A889`, Insight Amber `#F4B544`, IBM Plex Sans Arabic + Inter, with a Duolingo-style feel (chunky "sticker" buttons with a pressable ledge, rounded display type, a full-bleed footer band). The layout is Arabic-first RTL, with equations isolated left-to-right.
 

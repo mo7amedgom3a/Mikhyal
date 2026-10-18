@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans_Arabic, Inter, Baloo_Bhaijaan_2 } from "next/font/google";
 import "katex/dist/katex.min.css";
 import "./globals.css";
+import { Providers } from "@/components/providers";
 
 const arabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
@@ -27,8 +28,17 @@ export const viewport: Viewport = { themeColor: "#5146E8" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${arabic.variable} ${latin.variable} ${display.variable}`}>
-      <body className="min-h-dvh">{children}</body>
+    <html lang="ar" dir="rtl" className={`${arabic.variable} ${latin.variable} ${display.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.dataset.motion='ok'",
+          }}
+        />
+      </head>
+      <body className="min-h-dvh">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

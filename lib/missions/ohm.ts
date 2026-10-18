@@ -9,7 +9,7 @@ export const ohm: Mission = {
   order: 4,
   title: "نوّر اللمبة من غير ما الفيوز يضرب",
   tagline: "الكهربية · قانون أوم",
-  icon: "💡",
+  icon: "Lightbulb",
   concepts: ["electricity.ohm", "electricity.series"],
   groundTruth:
     "Ohm's law: I = V/R. Power P = V^2/R. Challenge: 12 V battery, fuse rated 2 A → minimum R = 6 ohm for the brightest safe lamp. In a series circuit the current is the same everywhere; current is not 'used up'.",
@@ -57,12 +57,12 @@ export const ohm: Mission = {
         { label: "القدرة", value: power(V, R).toFixed(1), unit: "W" },
         { label: "حد الفيوز", value: String(FUSE_MAX), unit: "A" },
       ];
-      if (I > FUSE_MAX) return { success: false, message: "⚡ الفيوز ضرب! التيار أكبر من 2 A.", readouts };
+      if (I > FUSE_MAX) return { success: false, message: "الفيوز ضرب! التيار أكبر من 2 A.", readouts };
       if (V !== 12)
-        return { success: false, message: "✅ آمن. بس البطارية في المهمة 12 V — رجّعها ولاقي أقل مقاومة.", readouts };
+        return { success: false, message: "آمن. بس البطارية في المهمة 12 V — رجّعها ولاقي أقل مقاومة.", readouts };
       if (I < FUSE_MAX * 0.9)
-        return { success: false, message: "💡 اللمبة منورة، بس ممكن تنور أكتر بأمان. قلّل المقاومة؟", readouts };
-      return { success: true, message: "🎯 أقصى إضاءة آمنة! أقل مقاومة = 6 Ω.", readouts };
+        return { success: false, message: "اللمبة منورة، بس ممكن تنور أكتر بأمان. قلّل المقاومة؟", readouts };
+      return { success: true, message: "أقصى إضاءة آمنة! أقل مقاومة = 6 Ω.", readouts };
     },
   },
   discovery: {
@@ -107,7 +107,7 @@ export const ohm: Mission = {
       represent: "دايرة بسيطة: مصدر — فيوز — مقاومة السخان.",
       model: "قانون أوم: V = IR. أقل R تقابل أكبر تيار مسموح.",
       translate: "R_min = V ÷ I_max",
-      verify: "V/A = Ω ✓. نفس فكرة اللمبة: 12 ÷ 2 = 6.",
+      verify: "V/A = Ω . نفس فكرة اللمبة: 12 ÷ 2 = 6.",
     },
     solution: "R_{min} = \\dfrac{220}{10} = 22\\ \\Omega",
   },

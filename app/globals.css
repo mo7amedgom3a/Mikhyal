@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* Mikhyal design tokens (UI/UX design system v1, §11) */
 :root {
@@ -14,20 +15,61 @@
   --brand-insight-soft: #fff4da;
   --danger: #e5484d;
   --danger-soft: #ffeceb;
-  --background: #f8faf9;
   --surface: #ffffff;
   --surface-muted: #f1f5f3;
   --surface-simulation: #f4f6ff;
-  --foreground: #172234;
   --text-secondary: #526173;
   --text-muted: #64748b;
-  --text-inverse: #ffffff;
-  --border: #e2e8e5;
   --border-strong: #cfd8d3;
+
+  /* shadcn/ui semantic tokens, mapped onto the Mikhyal palette */
+  --radius: 0.875rem;
+  --background: #f8faf9;
+  --foreground: #172234;
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --primary: var(--brand-primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-muted);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--brand-primary-soft);
+  --accent-foreground: var(--brand-primary);
+  --destructive: var(--danger);
+  --border: #e2e8e5;
+  --input: var(--border-strong);
+  --ring: var(--brand-primary);
 }
 
 @theme inline {
-  --color-primary: var(--brand-primary);
+  /* shadcn */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  /* Mikhyal brand utilities */
   --color-primary-hover: var(--brand-primary-hover);
   --color-primary-soft: var(--brand-primary-soft);
   --color-primary-edge: var(--brand-primary-edge);
@@ -41,152 +83,32 @@
   --color-danger-soft: var(--danger-soft);
   --color-canvas: var(--background);
   --color-surface: var(--surface);
-  --color-muted: var(--surface-muted);
   --color-sim: var(--surface-simulation);
   --color-ink: var(--foreground);
   --color-ink-2: var(--text-secondary);
   --color-ink-3: var(--text-muted);
   --color-line: var(--border);
   --color-line-strong: var(--border-strong);
+
   --font-sans: var(--font-arabic), var(--font-latin), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display-ar), var(--font-arabic), ui-sans-serif, sans-serif;
   --font-latin: var(--font-latin), ui-sans-serif, system-ui, sans-serif;
-  --radius-card: 20px;
-  --radius-ctl: 14px;
 }
 
-html {
-  background: var(--background);
-  color: var(--foreground);
-}
-
-body {
-  font-family: var(--font-sans);
-  background: var(--background);
-  line-height: 1.75;
-  -webkit-font-smoothing: antialiased;
-}
-
-@layer components {
-/* Duolingo-feel "sticker" buttons: chunky 2px edge + bottom ledge that presses in. */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 48px;
-  padding: 0 1.25rem;
-  border-radius: var(--radius-ctl);
-  font-weight: 700;
-  font-size: 1rem;
-  border: 2px solid transparent;
-  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-}
-.btn:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 0 var(--ledge, transparent);
-}
-.btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-.btn-primary {
-  --ledge: var(--brand-primary-edge);
-  background: var(--brand-primary);
-  color: var(--text-inverse);
-  box-shadow: 0 4px 0 0 var(--ledge);
-}
-.btn-primary:hover:not(:disabled) {
-  background: var(--brand-primary-hover);
-}
-.btn-mint {
-  --ledge: var(--brand-discovery-dark);
-  background: var(--brand-discovery);
-  color: var(--text-inverse);
-  box-shadow: 0 4px 0 0 var(--ledge);
-}
-.btn-amber {
-  --ledge: var(--brand-insight-dark);
-  background: var(--brand-insight);
-  color: var(--foreground);
-  box-shadow: 0 4px 0 0 var(--ledge);
-}
-.btn-ghost {
-  --ledge: var(--border-strong);
-  background: var(--surface);
-  color: var(--brand-primary);
-  border-color: var(--border-strong);
-  box-shadow: 0 4px 0 0 var(--ledge);
-}
-.btn-ghost:hover:not(:disabled) {
-  background: var(--brand-primary-soft);
-}
-
-.card {
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-card);
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: 2px solid var(--border);
-  background: var(--surface);
-  color: var(--text-secondary);
-}
-
-}
-
-.focus-ring:focus-visible,
-.btn:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-button:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--brand-primary) 55%, transparent);
-  outline-offset: 2px;
-}
-
-/* Range slider */
-input[type="range"].slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(
-    to left,
-    var(--brand-primary) 0%,
-    var(--brand-primary) var(--fill, 50%),
-    var(--surface-muted) var(--fill, 50%)
-  );
-  border: 2px solid var(--border);
-}
-input[type="range"].slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 3px solid var(--brand-primary);
-  box-shadow: 0 2px 0 var(--brand-primary-edge);
-  cursor: grab;
-}
-input[type="range"].slider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 3px solid var(--brand-primary);
-  cursor: grab;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    background: var(--background);
+    color: var(--foreground);
+  }
+  body {
+    font-family: var(--font-sans);
+    background: var(--background);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
 .ltr {
@@ -202,9 +124,25 @@ input[type="range"].slider::-moz-range-thumb {
   animation: pop-in 220ms ease-out both;
 }
 
+@keyframes typing-dot {
+  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-3px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Hero elements start hidden only when JS has opted into motion (see layout.tsx), so the
+   server-rendered page never flashes before GSAP's intro. The delayed animation is a
+   safety net that reveals them if scripts fail to run. */
+@keyframes motion-fallback {
+  to { visibility: visible; }
+}
+[data-motion="ok"] :is([data-hero-badge], [data-hero-word], [data-hero-sub], [data-hero-cta] > *, [data-hero-chip], [data-hero-demo], [data-formula]) {
+  visibility: hidden;
+  animation: motion-fallback 0s 3s forwards;
 }

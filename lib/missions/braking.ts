@@ -9,7 +9,7 @@ export const braking: Mission = {
   order: 1,
   title: "وقّف العربية في الوقت المناسب",
   tagline: "الحركة بعجلة منتظمة · معادلات الحركة",
-  icon: "🚗",
+  icon: "CarFront",
   concepts: ["kinematics.v2", "kinematics.deceleration"],
   groundTruth:
     "Uniform deceleration: v^2 = u^2 - 2as (a = deceleration magnitude). With v=0: s = u^2/(2a), a_min = u^2/(2d). Challenge: u=20 m/s, obstacle at 30 m → a_min = 6.67 m/s^2. Speed is NOT constant while braking, so t = d/u is invalid.",
@@ -63,16 +63,16 @@ export const braking: Mission = {
         { label: "المسافة للعائق", value: String(OBSTACLE), unit: "m" },
       ];
       if (s > OBSTACLE)
-        return { success: false, message: "💥 العربية خبطت في العائق! محتاجين تباطؤ أكبر.", readouts };
+        return { success: false, message: "العربية خبطت في العائق! محتاجين تباطؤ أكبر.", readouts };
       if (s < OBSTACLE * 0.9)
         return {
           success: false,
-          message: "✅ وقفت، بس الفرامل أعنف من اللازم. تقدر تقلل التباطؤ أكتر؟",
+          message: "وقفت، بس الفرامل أعنف من اللازم. تقدر تقلل التباطؤ أكتر؟",
           readouts,
         };
       return {
         success: true,
-        message: `🎯 ممتاز! أقل تباطؤ تقريبًا ${need.toFixed(2)} m/s². العربية وقفت على حافة العائق.`,
+        message: `ممتاز! أقل تباطؤ تقريبًا ${need.toFixed(2)} m/s². العربية وقفت على حافة العائق.`,
         readouts,
       };
     },
@@ -148,7 +148,7 @@ export const braking: Mission = {
       represent: "ارسم خط: u = 30 → v = 0، وسهم التباطؤ عكس الحركة.",
       model: "حركة بعجلة منتظمة، ومش عندنا زمن → نستخدم معادلة من غير t.",
       translate: "0 = u² − 2as  ⇒  s = u² ÷ 2a",
-      verify: "الوحدة: (m/s)² ÷ (m/s²) = m ✓. 180 متر منطقي لقطر سريع؟",
+      verify: "الوحدة: (m/s)² ÷ (m/s²) = m . 180 متر منطقي لقطر سريع؟",
     },
     solution: "s = \\dfrac{u^2}{2a} = \\dfrac{30^2}{2 \\times 2.5} = 180\\,\\text{m}",
   },

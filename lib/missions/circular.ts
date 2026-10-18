@@ -8,7 +8,7 @@ export const circular: Mission = {
   order: 3,
   title: "صمّم منحنى طريق آمن",
   tagline: "الحركة الدائرية · العجلة المركزية",
-  icon: "🛣️",
+  icon: "Route",
   concepts: ["circular.centripetal", "circular.friction"],
   groundTruth:
     "Uniform circular motion: centripetal acceleration a = v^2/r directed toward the center. On a flat curve, friction supplies it: v_max = sqrt(mu*g*r). Challenge: r=50 m, mu=0.5 → v_max ≈ 15.7 m/s (≈56 km/h). There is no outward 'centrifugal' force in the ground frame.",
@@ -58,18 +58,18 @@ export const circular: Mission = {
         { label: "أقصى سرعة آمنة", value: vmax.toFixed(1), unit: "m/s" },
       ];
       if (v > vmax)
-        return { success: false, message: "🚨 العربية انزلقت برّه! الاحتكاك مش كفاية يوفّر العجلة المركزية.", readouts };
+        return { success: false, message: "العربية انزلقت برّه! الاحتكاك مش كفاية يوفّر العجلة المركزية.", readouts };
       if (Math.abs(r - 50) > 0.01 || Math.abs(mu - 0.5) > 0.001)
         return {
           success: false,
-          message: "✅ آمن. بس اللافتة للمنحنى الحقيقي: رجّع r = 50 و μ = 0.5 ولاقي أقصى سرعة.",
+          message: "آمن. بس اللافتة للمنحنى الحقيقي: رجّع r = 50 و μ = 0.5 ولاقي أقصى سرعة.",
           readouts,
         };
       if (v < vmax * 0.92)
-        return { success: false, message: "✅ آمن، بس السرعة أقل من اللازم. تقدر تزودها شوية؟", readouts };
+        return { success: false, message: "آمن، بس السرعة أقل من اللازم. تقدر تزودها شوية؟", readouts };
       return {
         success: true,
-        message: `🎯 أقصى سرعة آمنة ≈ ${vmax.toFixed(1)} m/s (≈ ${(vmax * 3.6).toFixed(0)} km/h). اكتبها على اللافتة!`,
+        message: `أقصى سرعة آمنة ≈ ${vmax.toFixed(1)} m/s (≈ ${(vmax * 3.6).toFixed(0)} km/h). اكتبها على اللافتة!`,
         readouts,
       };
     },
@@ -115,7 +115,7 @@ export const circular: Mission = {
       represent: "ارسم الدائرة، سهم السرعة مماس، وسهم العجلة لجوه ناحية المركز.",
       model: "عجلة مركزية: a = v² ÷ r.",
       translate: "a = 12² ÷ 8",
-      verify: "الوحدة m²/s² ÷ m = m/s² ✓. 18 m/s² تقريبًا ضعف g — لعبة ملاهي مثيرة!",
+      verify: "الوحدة m²/s² ÷ m = m/s² . 18 m/s² تقريبًا ضعف g — لعبة ملاهي مثيرة!",
     },
     solution: "a_c = \\dfrac{12^2}{8} = 18\\ \\text{m/s}^2",
   },

@@ -7,7 +7,7 @@ export const relativity: Mission = {
   order: 6,
   title: "توأم الفضاء: الزمن بيتمدد",
   tagline: "النسبية الخاصة لأينشتاين · إثرائي",
-  icon: "🚀",
+  icon: "Rocket",
   enrichment: true,
   concepts: ["relativity.dilation"],
   groundTruth:
@@ -62,10 +62,10 @@ export const relativity: Mission = {
         { label: "زمن السفينة", value: t0.toFixed(0), unit: "سنة" },
       ];
       if (Math.abs(g - 2) <= 0.03)
-        return { success: true, message: `🎯 عند β ≈ ${beta.toFixed(3)} الزمن على الأرض ضعف زمن السفينة!`, readouts };
+        return { success: true, message: `عند β ≈ ${beta.toFixed(3)} الزمن على الأرض ضعف زمن السفينة!`, readouts };
       return {
         success: false,
-        message: g < 2 ? "🐢 التوأم على الأرض لسه ماكبرش كفاية. أسرع!" : "⚡ كده الأرض عدّى عليها أكتر من الضعف. هدّي شوية.",
+        message: g < 2 ? "التوأم على الأرض لسه ماكبرش كفاية. أسرع!" : "كده الأرض عدّى عليها أكتر من الضعف. هدّي شوية.",
         readouts,
       };
     },
@@ -111,7 +111,7 @@ export const relativity: Mission = {
       represent: "ساعة مع الميون (Δt₀) وساعة في المعمل (Δt).",
       model: "تمدد الزمن: Δt = γ Δt₀.",
       translate: "γ = 1 ÷ √(1 − 0.98²) ≈ 5.03",
-      verify: "Δt أكبر من Δt₀ ✓ (الساعة المتحركة أبطأ).",
+      verify: "Δt أكبر من Δt₀ (الساعة المتحركة أبطأ).",
     },
     solution: "\\Delta t = \\dfrac{2.2}{\\sqrt{1 - 0.98^2}} \\approx 11.06\\ \\mu\\text{s}",
   },

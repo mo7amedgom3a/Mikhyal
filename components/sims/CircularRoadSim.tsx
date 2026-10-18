@@ -1,4 +1,5 @@
 "use client";
+import { Wind } from "lucide-react";
 import { centripetalAcceleration, maxSafeSpeed } from "@/lib/physics/circular";
 import { useSimClock, type SimProps } from "./useSimClock";
 
@@ -72,9 +73,7 @@ export function CircularRoadSim({ params, runKey, onFinish }: SimProps) {
         <rect x="4" y="-6" width="7" height="12" rx="2" fill="#dfe3ff" />
       </g>
       {skidding && (
-        <text x={px + 12} y={py - 14} fontSize="26">
-          💨
-        </text>
+        <Wind x={px + 10} y={py - 40} width={28} height={28} color="var(--text-secondary)" strokeWidth={2.5} aria-label="انزلاق" />
       )}
       <g fontFamily="var(--font-latin)" fontSize="14">
         <rect x="14" y="14" width="210" height="76" rx="12" fill="#fff" stroke="var(--border)" strokeWidth="2" />

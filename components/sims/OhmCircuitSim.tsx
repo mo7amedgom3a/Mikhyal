@@ -1,4 +1,5 @@
 "use client";
+import { Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { current, power } from "@/lib/physics/ohm";
 import { useSimClock, usePrefersReducedMotion, type SimProps } from "./useSimClock";
@@ -97,7 +98,7 @@ export function OhmCircuitSim({ params, runKey, onFinish }: SimProps) {
           <>
             <path d="M-30 0 Q-14 -10 -6 2" stroke="var(--danger)" strokeWidth="3" fill="none" />
             <path d="M30 0 Q14 10 6 -2" stroke="var(--danger)" strokeWidth="3" fill="none" />
-            <text x="0" y="-20" textAnchor="middle" fontSize="22">⚡</text>
+            <Zap x={-12} y={-44} width={24} height={24} color="var(--danger)" fill="var(--brand-insight)" strokeWidth={2} aria-label="الفيوز ضرب" />
           </>
         ) : (
           <path d="M-30 0 Q-15 -8 0 0 T30 0" stroke="#172234" strokeWidth="3" fill="none" />

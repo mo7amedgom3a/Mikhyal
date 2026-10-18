@@ -20,6 +20,34 @@ import { DiscoveryClip } from "./DiscoveryClip";
 import { MasteryRing, masteryLabel } from "./MasteryIndicator";
 import { TutorPanel, type TutorMessage } from "./TutorPanel";
 import { ExamMode } from "./ExamMode";
+import { MissionIcon } from "@/lib/missions/icons";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  ArrowLeft,
+  Bot,
+  Brain,
+  Check,
+  CircleCheck,
+  ClipboardCheck,
+  Compass,
+  Eye,
+  FlaskConical,
+  Gauge,
+  History,
+  PartyPopper,
+  Play,
+  RotateCcw,
+  Sparkles,
+  Target,
+  TriangleAlert,
+  X,
+} from "lucide-react";
 
 interface Run {
   params: Record<string, number>;
@@ -234,7 +262,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
       };
       const res = await fetch("/api/tutor", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(req) });
       const data = (await res.json()) as TutorResponse;
-      if (!message) setHintLevel((x) => ({ ...x, [s]: data.hintLevel }));
+      setHintLevel((x) => ({ ...x, [s]: data.hintLevel }));
       setMessages((m) => [...m, { role: "tutor", text: data.reply, source: data.source }]);
     } catch {
       const h = nextHint(hints, level);
@@ -261,28 +289,35 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
   return (
     <div className="min-h-dvh bg-canvas">
       {/* top bar */}
-      <header className="sticky top-0 z-30 border-b-2 border-line bg-surface/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b-2 border-border bg-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1280px] items-center gap-3 px-4 py-2.5">
           <div className="hidden sm:block">
             <Logo href="/learn" />
           </div>
-          <Link href="/learn" className="btn btn-ghost !min-h-10 !px-3 sm:hidden" aria-label="رجوع لمسار التعلم">
-            ✕
-          </Link>
-          <div className="flex-1">{mode === "discovery" ? <LessonProgress current={stepIdx} maxReached={maxReached} onJump={goTo} /> : <p className="font-bold text-ink">📝 وضع الامتحان — {mission.title}</p>}</div>
-          <div className="flex rounded-[14px] border-2 border-line bg-muted p-1 text-sm font-bold" role="tablist" aria-label="الوضع">
-            {(["discovery", "exam"] as const).map((m) => (
-              <button
-                key={m}
-                role="tab"
-                aria-selected={mode === m}
-                onClick={() => setMode(m)}
-                className={`rounded-[10px] px-3 py-1.5 ${mode === m ? "bg-surface text-primary shadow-[0_2px_0_0_var(--border-strong)]" : "text-ink-3"}`}
-              >
-                {m === "discovery" ? "🔬 اكتشاف" : "📝 امتحان"}
-              </button>
-            ))}
+          <Button asChild variant="outline" size="icon-sm" className="sm:hidden">
+            <Link href="/learn" aria-label="رجوع لمسار التعلم">
+              <X />
+            </Link>
+          </Button>
+          <div className="flex-1">
+            {mode === "discovery" ? (
+              <LessonProgress current={stepIdx} maxReached={maxReached} onJump={goTo} />
+            ) : (
+              <p className="flex items-center gap-2 font-bold text-ink">
+                <ClipboardCheck className="size-5 text-amber-dark" aria-hidden /> وضع الامتحان — {mission.title}
+              </p>
+            )}
           </div>
+          <Tabs value={mode} onValueChange={(v) => setMode(v as "discovery" | "exam")}>
+            <TabsList aria-label="الوضع">
+              <TabsTrigger value="discovery">
+                <FlaskConical /> اكتشاف
+              </TabsTrigger>
+              <TabsTrigger value="exam">
+                <ClipboardCheck /> امتحان
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </header>
 
@@ -301,166 +336,185 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
       ) : (
         <main className="mx-auto grid max-w-[1280px] gap-5 px-4 py-5 lg:grid-cols-[minmax(340px,420px)_1fr]">
           {/* instruction column */}
-          <section className="card space-y-4 p-5 lg:self-start" aria-labelledby="step-title">
-            <div className="flex items-center justify-between">
-              <span className="chip">
-                {mission.icon} {mission.tagline}
-              </span>
-              {mission.enrichment && <span className="chip !border-amber !text-amber-dark">إثرائي</span>}
-            </div>
-            <h1 id="step-title" className="font-display text-[26px] font-extrabold leading-tight text-ink">
-              {stepIdx + 1}. {STEP_LABELS[step]}
-            </h1>
-
-            {step === "challenge" && (
-              <div className="space-y-3">
-                <p className="text-[18px] leading-9 text-ink">{mission.challenge.story}</p>
-                <p className="rounded-[14px] border-2 border-primary bg-primary-soft p-4 text-[17px] font-semibold leading-8 text-primary">🎯 {mission.challenge.goal}</p>
-                <p className="text-sm text-ink-3">قبل أي قانون، هنفكر ونجرّب بنفسنا.</p>
-              </div>
-            )}
-
-            {step === "predict" && (
-              <div className="space-y-3">
-                <p className="text-[18px] leading-9 text-ink">{mission.prediction.question}</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {mission.prediction.options.map((o) => (
-                    <button
-                      key={o.id}
-                      disabled={predictionLocked}
-                      onClick={() => setChoice(o.id)}
-                      aria-pressed={choice === o.id}
-                      className={`min-h-14 rounded-[14px] border-2 px-3 font-bold transition-colors ${
-                        predictionLocked && o.id === mission.prediction.correctId
-                          ? "border-mint bg-mint-soft text-mint-dark"
-                          : choice === o.id
-                            ? "border-primary bg-primary-soft text-primary shadow-[0_4px_0_0_var(--brand-primary)]"
-                            : "border-line-strong bg-surface text-ink shadow-[0_4px_0_0_var(--border-strong)]"
-                      }`}
-                    >
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-                {!predictionLocked && (
-                  <button disabled={!choice} onClick={submitPrediction} className="btn btn-primary w-full">
-                    ثبّت توقّعي
-                  </button>
-                )}
-              </div>
-            )}
-
-            {step === "experiment" && (
-              <div className="space-y-3">
-                <p className="text-[17px] leading-8 text-ink">{mission.experiment.instruction}</p>
-                {runs.length >= 4 && !expSuccess && <p className="text-sm text-ink-3">تقدر تكمّل، بس حاول توصل للهدف الأول 😉</p>}
-              </div>
-            )}
-
-            {step === "discover" && (
-              <div className="space-y-3">
-                <p className="text-[17px] leading-8 text-ink">{mission.discovery.prompt}</p>
-                {!eqSolved && !revealed ? (
-                  <EquationInput value={equation} onChange={setEquation} onSubmit={submitEquation} variables={mission.discovery.variables} />
-                ) : (
-                  <div className="space-y-3">
-                    <div className="rounded-[16px] border-2 border-mint bg-mint-soft p-4 text-center text-2xl">
-                      <Tex block>{mission.discovery.latex}</Tex>
-                    </div>
-                    <DiscoveryClip clip={mission.discovery.clip} derivation={mission.discovery.derivation} />
-                  </div>
-                )}
-                {!eqSolved && !revealed && (attempts.discover ?? 0) >= 4 && (
-                  <button onClick={() => setRevealed(true)} className="btn btn-ghost w-full">
-                    ورّيني الاشتقاق خطوة بخطوة
-                  </button>
-                )}
-              </div>
-            )}
-
-            {step === "apply" && (
-              <div className="space-y-4">
-                <p className="rounded-[14px] border-2 border-line bg-muted p-4 text-[18px] leading-9 text-ink">{mission.application.problem}</p>
-                <NumericInput value={numeric} onChange={setNumeric} onSubmit={submitNumeric} placeholder={mission.application.unitHint} disabled={numSolved} />
-                {(numSolved || revealed) && (
-                  <div className="rounded-[14px] bg-sim p-3 text-lg">
-                    <Tex block>{mission.application.solution}</Tex>
-                  </div>
-                )}
-                {!numSolved && !revealed && (attempts.apply ?? 0) >= 4 && (
-                  <button onClick={() => setRevealed(true)} className="btn btn-ghost w-full">
-                    ورّيني الحل
-                  </button>
-                )}
-              </div>
-            )}
-
-            {step === "reflect" && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 rounded-[16px] border-2 border-line p-4">
-                  <MasteryRing value={mastery} size={72} />
-                  <div>
-                    <p className="font-bold text-ink">الإتقان: {masteryLabel(mastery)}</p>
-                    <p className="text-sm text-ink-2">مبني على أدائك المستقل، مش عدد الدروس.</p>
-                  </div>
-                </div>
-                <p className="text-[17px] leading-8 text-ink">✅ {mission.reflection.summary}</p>
-                {sessionErrors.length > 0 ? (
-                  <div className="rounded-[16px] border-2 border-amber bg-amber-soft p-4">
-                    <p className="mb-2 font-bold text-ink">أفكار لسه محتاجة شغل:</p>
-                    <ul className="space-y-1 text-sm text-ink-2">
-                      {[...new Map(sessionErrors.map((d) => [d.ruleId, d])).values()].slice(0, 4).map((d) => (
-                        <li key={d.ruleId}>
-                          • <b>{ERROR_LABELS[d.errorType]}:</b> {d.prompt}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : (
-                  <p className="rounded-[16px] border-2 border-mint bg-mint-soft p-4 text-mint-dark">مفيش أخطاء متشخّصة المرة دي — عاش! 🎉</p>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={() => setMode("exam")} className="btn btn-amber flex-1">
-                    📝 جرّب وضع الامتحان
-                  </button>
-                  {mission.reflection.nextMissionId ? (
-                    <Link href={`/learn/${mission.reflection.nextMissionId}`} className="btn btn-primary flex-1">
-                      المهمة الجاية ←
-                    </Link>
-                  ) : (
-                    <Link href="/learn" className="btn btn-primary flex-1">
-                      مسار التعلم
-                    </Link>
+          <section aria-labelledby="step-title" className="rounded-[20px] border-2 border-border bg-card lg:self-start">
+              <CardContent className="space-y-4 p-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <Badge>
+                    <MissionIcon name={mission.icon} />
+                    {mission.tagline}
+                  </Badge>
+                  {mission.enrichment && (
+                    <Badge variant="amber">
+                      <Sparkles /> إثرائي
+                    </Badge>
                   )}
                 </div>
-              </div>
-            )}
+                <h1 id="step-title" className="font-display text-[26px] font-extrabold leading-tight text-ink">
+                  {stepIdx + 1}. {STEP_LABELS[step]}
+                </h1>
 
-            {feedback && (
-              <FeedbackPanel kind={feedback.action.kind} message={feedback.action.message} errorType={feedback.diagnosis?.errorType} />
-            )}
-
-            {step !== "reflect" && (
-              <div className="flex gap-2 pt-1">
-                <button onClick={next} disabled={!canAdvance} className="btn btn-mint flex-1">
-                  {step === "challenge" ? "يلا نبدأ" : "كمّل"} ←
-                </button>
-                {step !== "challenge" && (
-                  <button onClick={() => setTutorOpen(true)} className="btn btn-ghost" aria-label="اسأل مِخيال">
-                    🦉 <span className="hidden sm:inline">اسأل مِخيال</span>
-                  </button>
+                {step === "challenge" && (
+                  <div className="space-y-3">
+                    <p className="text-[18px] leading-9 text-ink">{mission.challenge.story}</p>
+                    <Alert variant="primary">
+                      <Target />
+                      <AlertDescription className="text-[17px] font-semibold leading-8 text-primary">{mission.challenge.goal}</AlertDescription>
+                    </Alert>
+                    <p className="text-sm text-ink-3">قبل أي قانون، هنفكر ونجرّب بنفسنا.</p>
+                  </div>
                 )}
-              </div>
-            )}
+
+                {step === "predict" && (
+                  <div className="space-y-3">
+                    <p className="text-[18px] leading-9 text-ink">{mission.prediction.question}</p>
+                    <ToggleGroup
+                      type="single"
+                      value={choice ?? ""}
+                      onValueChange={(v) => v && setChoice(v)}
+                      disabled={predictionLocked}
+                      className="grid-cols-2"
+                      aria-label="اختيارات التوقع"
+                    >
+                      {mission.prediction.options.map((o) => (
+                        <ToggleGroupItem
+                          key={o.id}
+                          value={o.id}
+                          className={predictionLocked && o.id === mission.prediction.correctId ? "border-mint bg-mint-soft text-mint-dark data-[state=on]:border-mint data-[state=on]:bg-mint-soft data-[state=on]:text-mint-dark" : ""}
+                        >
+                          {predictionLocked && o.id === mission.prediction.correctId && <Check />}
+                          {o.label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                    {!predictionLocked && (
+                      <Button disabled={!choice} onClick={submitPrediction} className="w-full">
+                        ثبّت توقّعي
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                {step === "experiment" && (
+                  <div className="space-y-3">
+                    <p className="text-[17px] leading-8 text-ink">{mission.experiment.instruction}</p>
+                    {runs.length >= 4 && !expSuccess && <p className="text-sm text-ink-3">تقدر تكمّل، بس حاول توصل للهدف الأول.</p>}
+                  </div>
+                )}
+
+                {step === "discover" && (
+                  <div className="space-y-3">
+                    <p className="text-[17px] leading-8 text-ink">{mission.discovery.prompt}</p>
+                    {!eqSolved && !revealed ? (
+                      <EquationInput value={equation} onChange={setEquation} onSubmit={submitEquation} variables={mission.discovery.variables} />
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="rounded-[16px] border-2 border-mint bg-mint-soft p-4 text-center text-2xl">
+                          <Tex block>{mission.discovery.latex}</Tex>
+                        </div>
+                        <DiscoveryClip clip={mission.discovery.clip} derivation={mission.discovery.derivation} />
+                      </div>
+                    )}
+                    {!eqSolved && !revealed && (attempts.discover ?? 0) >= 4 && (
+                      <Button variant="outline" onClick={() => setRevealed(true)} className="w-full">
+                        <Eye /> ورّيني الاشتقاق خطوة بخطوة
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                {step === "apply" && (
+                  <div className="space-y-4">
+                    <p className="rounded-[14px] border-2 border-border bg-muted p-4 text-[18px] leading-9 text-ink">{mission.application.problem}</p>
+                    <NumericInput value={numeric} onChange={setNumeric} onSubmit={submitNumeric} placeholder={mission.application.unitHint} disabled={numSolved} />
+                    {(numSolved || revealed) && (
+                      <div className="rounded-[14px] bg-sim p-3 text-lg">
+                        <Tex block>{mission.application.solution}</Tex>
+                      </div>
+                    )}
+                    {!numSolved && !revealed && (attempts.apply ?? 0) >= 4 && (
+                      <Button variant="outline" onClick={() => setRevealed(true)} className="w-full">
+                        <Eye /> ورّيني الحل
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                {step === "reflect" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 rounded-[16px] border-2 border-border p-4">
+                      <MasteryRing value={mastery} size={72} />
+                      <div>
+                        <p className="font-bold text-ink">الإتقان: {masteryLabel(mastery)}</p>
+                        <p className="text-sm text-ink-2">مبني على أدائك المستقل، مش عدد الدروس.</p>
+                      </div>
+                    </div>
+                    <Alert variant="mint">
+                      <CircleCheck />
+                      <AlertDescription className="text-[17px] leading-8 text-ink">{mission.reflection.summary}</AlertDescription>
+                    </Alert>
+                    {sessionErrors.length > 0 ? (
+                      <Alert variant="amber">
+                        <Compass />
+                        <AlertTitle>أفكار لسه محتاجة شغل</AlertTitle>
+                        <AlertDescription>
+                          <ul className="space-y-1 text-sm">
+                            {[...new Map(sessionErrors.map((d) => [d.ruleId, d])).values()].slice(0, 4).map((d) => (
+                              <li key={d.ruleId}>
+                                <b>{ERROR_LABELS[d.errorType]}:</b> {d.prompt}
+                              </li>
+                            ))}
+                          </ul>
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <Alert variant="mint">
+                        <PartyPopper />
+                        <AlertDescription>مفيش أخطاء متشخّصة المرة دي — عاش!</AlertDescription>
+                      </Alert>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="amber" onClick={() => setMode("exam")} className="flex-1">
+                        <ClipboardCheck /> جرّب وضع الامتحان
+                      </Button>
+                      <Button asChild className="flex-1">
+                        {mission.reflection.nextMissionId ? (
+                          <Link href={`/learn/${mission.reflection.nextMissionId}`}>
+                            المهمة الجاية <ArrowLeft />
+                          </Link>
+                        ) : (
+                          <Link href="/learn">مسار التعلم</Link>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {feedback && <FeedbackPanel kind={feedback.action.kind} message={feedback.action.message} errorType={feedback.diagnosis?.errorType} />}
+
+                {step !== "reflect" && (
+                  <div className="flex gap-2 pt-1">
+                    <Button variant="mint" onClick={next} disabled={!canAdvance} className="flex-1">
+                      {step === "challenge" ? "يلا نبدأ" : "كمّل"}
+                      <ArrowLeft />
+                    </Button>
+                    {step !== "challenge" && (
+                      <Button variant="outline" onClick={() => setTutorOpen(true)} aria-label="اسأل مِخيال">
+                        <Bot />
+                        <span className="hidden sm:inline">اسأل مِخيال</span>
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
           </section>
 
           {/* workspace column */}
           <section className="space-y-4" aria-label="مساحة العمل">
             {showSim ? (
               <>
-                <div className="card overflow-hidden" dir="ltr">
+                <Card className="overflow-hidden" dir="ltr">
                   <Sim params={params} runKey={runKey} onFinish={onRunFinished} />
-                </div>
+                </Card>
                 {simInteractive && (
                   <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
                     <div className="space-y-3">
@@ -470,88 +524,120 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
                         ))}
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <button onClick={run} className="btn btn-primary flex-1">
-                          ▶ شغّل التجربة
-                        </button>
-                        <button onClick={() => { setParams(defaults); resetRun(); }} className="btn btn-ghost">
-                          ↺ إعادة ضبط
-                        </button>
+                        <Button onClick={run} className="flex-1">
+                          <Play /> شغّل التجربة
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setParams(defaults);
+                            resetRun();
+                          }}
+                        >
+                          <RotateCcw /> إعادة ضبط
+                        </Button>
                       </div>
                       {runKey > 0 && !simRunning && (
-                        <p role="status" className={`pop-in rounded-[14px] border-2 p-3 font-semibold ${outcome.success ? "border-mint bg-mint-soft text-mint-dark" : "border-line bg-surface text-ink"}`}>
-                          {outcome.message}
-                        </p>
+                        <Alert variant={outcome.success ? "mint" : "default"} role="status" className="pop-in">
+                          {outcome.success ? <CircleCheck /> : <TriangleAlert className="text-amber-dark" />}
+                          <AlertDescription className={`font-semibold ${outcome.success ? "text-mint-dark" : "text-ink"}`}>{outcome.message}</AlertDescription>
+                        </Alert>
                       )}
                     </div>
                     <div className="space-y-3">
-                      <div className="card p-4">
-                        <p className="mb-2 text-sm font-bold text-ink-2">قراءات مباشرة</p>
-                        <dl className="space-y-1.5">
-                          {outcome.readouts.map((r) => (
-                            <div key={r.label} className="flex items-baseline justify-between gap-2">
-                              <dt className="text-sm text-ink-3">{r.label}</dt>
-                              <dd className="ltr font-latin font-bold text-ink">
-                                {r.value} <span className="text-xs text-ink-3">{r.unit}</span>
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-                      </div>
-                      {runs.length > 0 && (
-                        <div className="card p-4">
-                          <p className="mb-2 text-sm font-bold text-ink-2">سجل التجارب</p>
-                          <ul className="space-y-1.5">
-                            {runs.map((r, i) => (
-                              <li key={i}>
-                                <button
-                                  onClick={() => { setParams(r.params); resetRun(); }}
-                                  className="flex w-full items-center justify-between gap-2 rounded-[10px] px-2 py-1 text-start text-sm hover:bg-muted"
-                                  title="رجّع الإعدادات دي"
-                                >
-                                  <span className="ltr font-latin text-ink-2">
-                                    {Object.entries(r.params).map(([k, v]) => `${k}=${v}`).join("  ")}
-                                  </span>
-                                  <span aria-label={r.outcome.success ? "نجحت" : "لم تنجح"}>{r.outcome.success ? "✅" : "✖️"}</span>
-                                </button>
-                              </li>
+                      <Card>
+                        <CardContent className="p-4">
+                          <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-ink-2">
+                            <Gauge className="size-4 text-primary" aria-hidden /> قراءات مباشرة
+                          </p>
+                          <dl className="space-y-1.5">
+                            {outcome.readouts.map((r) => (
+                              <div key={r.label} className="flex items-baseline justify-between gap-2">
+                                <dt className="text-sm text-ink-3">{r.label}</dt>
+                                <dd className="ltr font-latin font-bold text-ink">
+                                  {r.value} <span className="text-xs text-ink-3">{r.unit}</span>
+                                </dd>
+                              </div>
                             ))}
-                          </ul>
-                        </div>
+                          </dl>
+                        </CardContent>
+                      </Card>
+                      {runs.length > 0 && (
+                        <Card>
+                          <CardContent className="p-4">
+                            <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-ink-2">
+                              <History className="size-4 text-primary" aria-hidden /> سجل التجارب
+                            </p>
+                            <ul className="space-y-1">
+                              {runs.map((r, i) => (
+                                <li key={i}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        onClick={() => {
+                                          setParams(r.params);
+                                          resetRun();
+                                        }}
+                                        className="flex w-full items-center justify-between gap-2 rounded-[10px] px-2 py-1 text-start text-sm outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/40"
+                                      >
+                                        <span className="ltr font-latin text-ink-2">{Object.entries(r.params).map(([k, v]) => `${k}=${v}`).join("  ")}</span>
+                                        {r.outcome.success ? (
+                                          <Check className="size-4 text-mint-dark" aria-label="نجحت" />
+                                        ) : (
+                                          <X className="size-4 text-ink-3" aria-label="لم تنجح" />
+                                        )}
+                                      </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>رجّع الإعدادات دي</TooltipContent>
+                                  </Tooltip>
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
                       )}
                     </div>
                   </div>
                 )}
               </>
             ) : step === "apply" ? (
-              <div className="card space-y-3 p-5">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-bold text-ink">🧠 إطار حل المشكلات</h2>
-                  <span className="chip text-xs">{scaffold === "full" ? "إرشاد كامل" : scaffold === "partial" ? "إرشاد جزئي" : "حل مستقل"}</span>
-                </div>
-                <p className="text-sm text-ink-3">موقف جديد بنفس الفكرة. المساعدة بتقل كل ما إتقانك يزيد.</p>
-                <ProblemSolverSteps prompts={mission.application.solver} scaffold={scaffold} />
-              </div>
+              <Card>
+                <CardContent className="space-y-3 p-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="flex items-center gap-2 font-bold text-ink">
+                      <Brain className="size-5 text-primary" aria-hidden /> إطار حل المشكلات
+                    </h2>
+                    <Badge className="text-xs">{scaffold === "full" ? "إرشاد كامل" : scaffold === "partial" ? "إرشاد جزئي" : "حل مستقل"}</Badge>
+                  </div>
+                  <p className="text-sm text-ink-3">موقف جديد بنفس الفكرة. المساعدة بتقل كل ما إتقانك يزيد.</p>
+                  <ProblemSolverSteps prompts={mission.application.solver} scaffold={scaffold} />
+                </CardContent>
+              </Card>
             ) : (
-              <div className="card space-y-4 p-6">
-                <h2 className="font-display text-2xl font-extrabold text-ink">رحلتك في المهمة دي</h2>
-                <ol className="grid gap-2 sm:grid-cols-3">
-                  {STEP_ORDER.slice(0, 5).map((s, i) => (
-                    <li key={s} className="rounded-[14px] border-2 border-mint bg-mint-soft p-3 text-sm font-semibold text-mint-dark">
-                      ✓ {i + 1}. {STEP_LABELS[s]}
-                    </li>
-                  ))}
-                </ol>
-                <div className="rounded-[16px] bg-sim p-4 text-center text-2xl">
-                  <Tex block>{mission.discovery.latex}</Tex>
-                </div>
-                <p className="text-sm text-ink-3">جرّبت {runs.length} تجربة، وعملت {(attempts.discover ?? 0) + (attempts.apply ?? 0)} محاولة حل.</p>
-              </div>
+              <Card>
+                <CardContent className="space-y-4 p-6">
+                  <h2 className="font-display text-2xl font-extrabold text-ink">رحلتك في المهمة دي</h2>
+                  <ol className="grid gap-2 sm:grid-cols-3">
+                    {STEP_ORDER.slice(0, 5).map((s, i) => (
+                      <li key={s} className="flex items-center gap-1.5 rounded-[14px] border-2 border-mint bg-mint-soft p-3 text-sm font-semibold text-mint-dark">
+                        <Check className="size-4" aria-hidden /> {i + 1}. {STEP_LABELS[s]}
+                      </li>
+                    ))}
+                  </ol>
+                  <div className="rounded-[16px] bg-sim p-4 text-center text-2xl">
+                    <Tex block>{mission.discovery.latex}</Tex>
+                  </div>
+                  <p className="text-sm text-ink-3">
+                    جرّبت {runs.length} تجربة، وعملت {(attempts.discover ?? 0) + (attempts.apply ?? 0)} محاولة حل.
+                  </p>
+                </CardContent>
+              </Card>
             )}
           </section>
         </main>
       )}
 
-      <TutorPanel open={tutorOpen} onClose={() => setTutorOpen(false)} messages={messages} busy={tutorBusy} onSend={(t) => askTutor(t)} onHint={() => askTutor()} />
+      <TutorPanel open={tutorOpen} onOpenChange={setTutorOpen} messages={messages} busy={tutorBusy} onSend={(t) => askTutor(t)} onHint={() => askTutor()} />
     </div>
   );
 }

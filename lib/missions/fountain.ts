@@ -7,7 +7,7 @@ export const fountain: Mission = {
   order: 5,
   title: "صمّم مسار نافورة",
   tagline: "الدوال التربيعية · الجذور ورأس المنحنى",
-  icon: "⛲",
+  icon: "Droplets",
   concepts: ["algebra.quadratic.vertex", "algebra.quadratic.roots"],
   groundTruth:
     "Quadratic y = ax^2 + bx + c (a<0 opens down). Vertex x = -b/(2a), y = c - b^2/(4a). Roots via quadratic formula. Challenge: nozzle at origin (c=0), land at x=4, peak height 2 → a = -0.5, b = 2.",
@@ -54,10 +54,10 @@ export const fountain: Mission = {
       ];
       const lands = land !== null && Math.abs(land - 4) <= 0.2;
       const peak = Math.abs(v.y - 2) <= 0.15;
-      if (lands && peak) return { success: true, message: "🎯 المية نزلت في الحوض وأعلى نقطة 2 m. تصميم مثالي!", readouts };
-      if (lands) return { success: false, message: "💧 نزلت في الحوض، بس الارتفاع مش 2 m.", readouts };
-      if (peak) return { success: false, message: "📏 الارتفاع مظبوط، بس المية مانزلتش في الحوض.", readouts };
-      return { success: false, message: "🌊 المية طرطشت برّه الحوض. جرّب تاني.", readouts };
+      if (lands && peak) return { success: true, message: "المية نزلت في الحوض وأعلى نقطة 2 m. تصميم مثالي!", readouts };
+      if (lands) return { success: false, message: "نزلت في الحوض، بس الارتفاع مش 2 m.", readouts };
+      if (peak) return { success: false, message: "الارتفاع مظبوط، بس المية مانزلتش في الحوض.", readouts };
+      return { success: false, message: "المية طرطشت برّه الحوض. جرّب تاني.", readouts };
     },
   },
   discovery: {
@@ -107,7 +107,7 @@ export const fountain: Mission = {
       represent: "ارسم القطع المكافئ: يبدأ من 0 ويرجع للأرض، والرأس في النص.",
       model: "رأس الدالة التربيعية: h = −b ÷ 2a ثم k = y(h).",
       translate: "h = −3 ÷ (2 × −0.25) = 6  ⇒  k = −0.25(36) + 3(6)",
-      verify: "الرأس في نص المسافة بين الجذرين 0 و 12 ✓.",
+      verify: "الرأس في نص المسافة بين الجذرين 0 و 12 .",
     },
     solution: "h = 6,\\quad k = -0.25(6)^2 + 3(6) = 9\\ \\text{m}",
   },
