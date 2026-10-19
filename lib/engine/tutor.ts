@@ -1,6 +1,7 @@
 /** Shared tutor contract + deterministic fallback used when no LLM is configured. */
 import type { Diagnosis, Mission, StepId } from "./types";
 import type { Sandbox, SandboxLevel } from "../sandbox/types";
+import type { WorkbenchProblem } from "../workbench/types";
 import { nextHint } from "./pedagogy";
 
 export interface TutorRequest {
@@ -8,7 +9,9 @@ export interface TutorRequest {
   /** Playground requests name a sandbox and level instead of a mission. */
   sandboxId?: string;
   levelId?: string;
-  step: StepId | "exam" | "sandbox";
+  /** Workbench requests name a problem; context carries the step and its validation trace. */
+  workbenchId?: string;
+  step: StepId | "exam" | "sandbox" | "workbench";
   message?: string;
   hintLevel: number;
   diagnosis?: Diagnosis;
@@ -24,7 +27,7 @@ export interface TutorResponse {
 }
 
 export function rulesReply(mission: Mission, req: TutorRequest): TutorResponse {
-  const hints = req.step === "exam" || req.step === "sandbox" ? [] : mission.hints[req.step] ?? [];
+  const hints = req.step === "exam" || req.step === "sandbox" || req.step === "workbench" ? [] : mission.hints[req.step] ?? [];
   if (req.diagnosis && !req.message) {
     return { reply: req.diagnosis.prompt, hintLevel: req.hintLevel, source: "rules" };
   }
@@ -86,5 +89,29 @@ export function sandboxSystemPrompt(sandbox: AnySandbox, level: AnyLevel): strin
     `Level: ${level.title}. ${level.story}`,
     `Goals: ${level.goals.map((g) => g.label).join(" | ")}`,
     `Hint ladder (for calibration, do not quote verbatim): ${level.hints.join(" / ")}`,
+  ].join("\n");
+}
+
+export function workbenchRulesReply(problem: WorkbenchProblem, req: TutorRequest): TutorResponse {
+  const ladder = [problem.hints.conceptual, problem.hints.strategic, problem.hints.procedural, problem.hints.verification];
+  const h = nextHint(ladder, req.hintLevel);
+  const lead = req.message
+    ? "مش متأكد إني فهمت خطوتك صح، فخليني أسألك: إيه الكمية اللي كنت عايز توصلها في الخطوة دي؟ وفي نفس الوقت: "
+    : "";
+  return { reply: lead + h.message, hintLevel: h.hintLevel, source: "rules" };
+}
+
+export function workbenchSystemPrompt(problem: WorkbenchProblem): string {
+  return [
+    "You are «مِخيال», a Socratic tutor inside the Mathematical Workbench, for Egyptian secondary students.",
+    "Reply in friendly Egyptian Arabic (عامية مصرية), 1–3 short sentences. Write every equation or symbol as LaTeX between single dollar signs.",
+    "The student's step was already graded deterministically on three properties (mathematical, physical, pedagogical); the trace is in the workspace state.",
+    "Your job is interpretation: say in one sentence what the student seems to be attempting, then ask ONE question that helps them express it as a valid step.",
+    "Never give the final numeric answer or write the next step for them. Never contradict the deterministic verdicts.",
+    "Do not force the authored method: any mathematically and physically valid route is welcome.",
+    "",
+    `Problem: ${problem.title}. ${problem.scenario} ${problem.ask}`,
+    `Assumptions: ${problem.assumptions.map((a) => a.label_ar).join(" | ")}`,
+    `Applicable principles: ${problem.principles.filter((p) => p.status === "applicable").map((p) => p.latex).join(" ; ")}`,
   ].join("\n");
 }

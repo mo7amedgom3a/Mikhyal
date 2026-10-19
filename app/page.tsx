@@ -78,6 +78,19 @@ function SectionTitle({ kicker, title, sub }: { kicker: string; title: string; s
   );
 }
 
+const WORKBENCH_DEMO: { tex: string; verdicts: [string, boolean][]; note: string }[] = [
+  { tex: "v^2 = u^2 + 2as", verdicts: [["رياضيًا", true], ["فيزيائيًا", true], ["تربويًا", true]], note: "قانون مناسب: العجلة ثابتة ومش محتاجين زمن." },
+  { tex: "s = \\dfrac{0^2 - 20^2}{2(5)} = -40\\,\\mathrm{m}", verdicts: [["رياضيًا", true], ["فيزيائيًا", false]], note: "الحساب سليم، بس إشارة العجلة غلط: العربية بتبطّأ. ← تلميح تحقق" },
+  { tex: "s = \\dfrac{u+v}{2}\\,t", verdicts: [["رياضيًا", true], ["فيزيائيًا", true], ["مسار جديد ✦", true]], note: "طريق مش في الحل المكتوب — بس صحيح، فاتقبل." },
+];
+
+const AUDIENCE_TEASERS = [
+  { href: "/phenomena", icon: Sparkles, title: "ظواهر شهيرة", text: "من بوصلة أورستد للنفق الكمّي — 9 ظواهر بتجاربها ومهماتها." },
+  { href: "/teach", icon: Users, title: "للمدرّسين", text: "لوحة صحة الخطوات، مسارات التفكير، وأداة تأليف جراف الحل." },
+  { href: "/parents", icon: BookOpenCheck, title: "لأولياء الأمور", text: "جودة التفكير مش الدرجة بس، وأسئلة للنقاش في البيت." },
+  { href: "/features", icon: Sigma, title: "كل المميزات", text: "صفحة مميزات لكل جمهور: طلاب، مدرّسين، وأولياء أمور." },
+];
+
 export default function Home() {
   return (
     <>
@@ -181,6 +194,60 @@ export default function Home() {
                 ادخل الملعب <ArrowLeft className="size-5" />
               </span>
             </Link>
+          </section>
+
+          {/* Mathematical Workbench + audiences */}
+          <section id="workbench" className="scroll-mt-20 border-y-2 border-border bg-surface px-4 py-24">
+            <SectionTitle kicker="المختبر الرياضي" title="بنقيّم طريقة تفكيرك، مش الإجابة بس" sub="كل خطوة بتتقيّم على 3 حاجات منفصلة، وبتتقارن بجراف حل فيه أكتر من طريق صحيح. ولو لقيت طريق جديد صحيح؟ بيتقبل ويتسجّل." />
+            <div data-stagger className="mx-auto mt-12 grid max-w-[1100px] gap-5 lg:grid-cols-[1.2fr_1fr]">
+              <Card>
+                <CardContent className="space-y-3 p-6">
+                  {WORKBENCH_DEMO.map((w, i) => (
+                    <div key={i} className="rounded-[14px] border-2 border-border bg-card p-3">
+                      <div className="overflow-x-auto text-lg" dir="ltr">
+                        <Tex>{w.tex}</Tex>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-semibold">
+                        {w.verdicts.map(([label, ok]) => (
+                          <span key={label} className={`rounded-full border-2 px-2 py-0.5 ${ok ? "border-mint/50 bg-mint-soft text-mint-dark" : "border-amber bg-amber-soft text-amber-dark"}`}>
+                            {ok ? "✓" : "!"} {label}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="mt-1.5 text-sm text-ink-2">{w.note}</p>
+                    </div>
+                  ))}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button asChild>
+                      <Link href="/workbench/braking_001">
+                        جرّب مسألة الفرملة <ArrowLeft />
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                      <Link href="/workbench/pipeline">خط التحقق</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              <div className="grid gap-4">
+                {AUDIENCE_TEASERS.map((a) => (
+                  <Link
+                    key={a.href}
+                    href={a.href}
+                    className="group flex items-center gap-4 rounded-[20px] border-2 border-border bg-card p-5 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                  >
+                    <span className="grid size-12 shrink-0 place-items-center rounded-[14px] bg-primary-soft text-primary">
+                      <a.icon className="size-6" aria-hidden />
+                    </span>
+                    <span className="flex-1">
+                      <span className="block font-bold text-ink">{a.title}</span>
+                      <span className="block text-sm text-ink-2">{a.text}</span>
+                    </span>
+                    <ArrowLeft className="size-5 text-primary transition-transform group-hover:-translate-x-1" aria-hidden />
+                  </Link>
+                ))}
+              </div>
+            </div>
           </section>
 
           {/* Two modes */}
@@ -367,6 +434,15 @@ export default function Home() {
               <Link href="/learn" className="block text-white/80 hover:text-white">
                 مسار التعلم
               </Link>
+              <Link href="/workbench" className="block text-white/80 hover:text-white">
+                المختبر الرياضي
+              </Link>
+              <Link href="/phenomena" className="block text-white/80 hover:text-white">
+                الظواهر
+              </Link>
+              <Link href="/features" className="block text-white/80 hover:text-white">
+                المميزات
+              </Link>
               <a href="#missions" className="block text-white/80 hover:text-white">
                 المهمات
               </a>
@@ -376,9 +452,12 @@ export default function Home() {
             </div>
             <div className="space-y-2">
               <p className="font-bold">للشركاء</p>
-              <a href="#waitlist" className="block text-white/80 hover:text-white">
-                المدرسين
-              </a>
+              <Link href="/teach" className="block text-white/80 hover:text-white">
+                لوحة المدرّس
+              </Link>
+              <Link href="/parents" className="block text-white/80 hover:text-white">
+                تقرير ولي الأمر
+              </Link>
               <a href="#waitlist" className="block text-white/80 hover:text-white">
                 المدارس والسناتر
               </a>

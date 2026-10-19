@@ -1,8 +1,19 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { getMission } from "@/lib/missions";
-import { rulesReply, sandboxRulesReply, sandboxSystemPrompt, systemPrompt, userTurn, type TutorRequest, type TutorResponse } from "@/lib/engine/tutor";
+import {
+  rulesReply,
+  sandboxRulesReply,
+  sandboxSystemPrompt,
+  systemPrompt,
+  userTurn,
+  workbenchRulesReply,
+  workbenchSystemPrompt,
+  type TutorRequest,
+  type TutorResponse,
+} from "@/lib/engine/tutor";
 import { getSandbox } from "@/lib/sandbox";
+import { getWorkbenchProblem } from "@/lib/workbench/problems";
 
 const MODEL = process.env.MIKHYAL_TUTOR_MODEL || "claude-opus-5-5";
 
@@ -15,7 +26,12 @@ export async function POST(request: Request) {
   }
   let system: string;
   let fallback: TutorResponse;
-  if (body.sandboxId) {
+  if (body.workbenchId) {
+    const problem = getWorkbenchProblem(body.workbenchId);
+    if (!problem) return NextResponse.json({ error: "unknown workbench problem" }, { status: 404 });
+    system = workbenchSystemPrompt(problem);
+    fallback = workbenchRulesReply(problem, body);
+  } else if (body.sandboxId) {
     const sandbox = getSandbox(body.sandboxId);
     const level = sandbox?.levels.find((l) => l.id === body.levelId);
     if (!sandbox || !level) return NextResponse.json({ error: "unknown sandbox level" }, { status: 404 });

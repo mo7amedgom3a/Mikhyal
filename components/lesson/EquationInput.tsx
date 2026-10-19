@@ -85,20 +85,31 @@ export function EquationInput({
   onSubmit,
   variables,
   disabled,
+  symbolTex,
+  preview,
+  submitLabel = "تحقّق",
 }: {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
   variables: Record<string, string>;
   disabled?: boolean;
+  /** LaTeX for each variable key (e.g. dL → \Delta L) when the default subscript rule doesn't fit. */
+  symbolTex?: Record<string, string>;
+  /** Custom "how the machine read it" renderer. */
+  preview?: (raw: string) => string | null;
+  submitLabel?: string;
 }) {
   const [mode, setMode] = useState<"visual" | "text">("visual");
   const field = useRef<MathFieldHandle>(null);
   const textInput = useRef<HTMLInputElement>(null);
-  const tex = useMemo(() => toTex(value, Object.keys(variables)), [value, variables]);
+  const tex = useMemo(() => (preview ? preview(value) : toTex(value, Object.keys(variables))), [value, variables, preview]);
   const fallbackToText = useCallback(() => setMode("text"), []);
 
-  const varKeys: Key[] = Object.entries(variables).map(([k, label]) => ({ show: varLatex(k), latex: varLatex(k), text: varLatex(k), label }));
+  const varKeys: Key[] = Object.entries(variables).map(([k, label]) => {
+    const t = symbolTex?.[k] ?? varLatex(k);
+    return { show: t, latex: t, text: symbolTex?.[k] ? `${t} ` : t, label };
+  });
 
   const press = (k: Key) => {
     if (mode === "visual") {
@@ -169,7 +180,7 @@ export function EquationInput({
         </div>
         <Button type="submit" disabled={disabled || !value.trim()} className="min-h-14">
           <Check />
-          تحقّق
+          {submitLabel}
         </Button>
       </form>
 

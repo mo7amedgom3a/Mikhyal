@@ -50,6 +50,61 @@ Constructive puzzles with no Run button. The student builds, a deterministic sol
   - A new sandbox only needs a model, a solver, a board and levels.
 - Missions link to their related sandbox from the reflection step: Ohm's law → circuits; vectors and statics → force table.
 
+## Mathematical Workbench: grading reasoning, not just answers (`/workbench`)
+
+Students solve step by step. Each step is a structured object (the wire format the backend validates), not a string:
+
+```json
+{ "step_id": "step_002", "attempt_id": "attempt_1a2b3c4d", "expression_latex": "s = \\frac{v^2-u^2}{2a}",
+  "expression_ast": ["Equal", "s", ["Divide", ["Subtract", ["Power", "v", 2], ["Power", "u", 2]], ["Multiply", 2, "a"]]],
+  "ast_version": "mathjson/1", "operation": "isolate_variable", "inputs": ["step_001"], "target_variable": "s",
+  "unit": "m", "student_explanation": "I isolated distance", "client_step_id": "uuid-for-retry" }
+```
+
+- **Three independent properties per step.**
+  - *Mathematical*: is the step equivalent to its inputs? Root sets are compared in both directions, so a step that **loses solutions** or **adds extraneous ones** is caught, not just a wrong one.
+  - *Physical*: dimensions, principle applicability (e.g. $F = ma$ when friction is stated is valid maths but an *incomplete model*), sign conventions, constraints, and agreement with the situation.
+  - *Pedagogical*: does the step advance the current goal?
+- **Solution graphs, not decision trees** (`lib/workbench/problems/*`):
+  - Nodes are known quantities, principles, equation applications, transformations, intermediate goals/values, constraints and goals; edges are dependency, derivation, substitution or alternative.
+  - Every problem has at least two authored paths and at least one multi-dependency node.
+  - The graph is **not exhaustive**: a valid step that matches no node is accepted and recorded as an *unanticipated route* (e.g. $s = \\tfrac12(u+v)t$ for braking).
+- **Pipeline** (`lib/workbench/validate.ts`, shown live at `/workbench/pipeline`):
+  1. Restricted parser (whitelisted AST with size limits, so no code execution) → MathJSON.
+  2. Symbolic, unit and physics checks.
+  3. Graph matcher.
+  4. Pedagogical decision: accept · clarify · hint · experiment · AI interpretation.
+
+  The layer table maps each MVP layer to its production tool (Compute Engine, SymPy, Pint).
+- **Recoverable errors with diagnosis:**
+  - a flipped sign ("your arithmetic is right for the value you used, but a should be negative");
+  - an unconverted unit (eV subtracted from J);
+  - the wrong model ($s = ut$, which leads to an experiment);
+  - a wrong rearrangement (caught by the units check).
+- **Subtle errors**: $x^2 = 9 \\to x = 3$, squaring both sides, dividing by $x$, $\\sin\\theta = \\tfrac12$, and $(x^2-1)/(x-1)$. Each gets a Socratic nudge instead of right/wrong, and toggling the stated assumption changes the verdict.
+- **UI:**
+  - graduated hints (conceptual → strategic → procedural → verification, contextual to the next graph node);
+  - a live completion checklist;
+  - per-step retry with fresh `attempt_id`/`client_step_id`;
+  - a solution explorer with progressive reveal;
+  - a scripted demo.
+  - Steps are validated by `POST /api/workbench/validate`, with an offline fallback.
+- **Problems:** braking distance (canonical), photoelectric effect, thermal expansion (rail gaps), and friction ("$F = ma$ is not enough").
+
+## Phenomena, instructors and parents
+
+- **`/phenomena`**: nine famous phenomena in three groups:
+  - electromagnetic: magnetism, Hall effect, photoelectric;
+  - thermal: expansion, phase transitions, entropy;
+  - quantum and relativistic: wave–particle duality, tunnelling, Unruh (advanced, optional).
+
+  Each module has a description, its famous experiment, the Workbench equation chain and checks, a graded mission (any unit), and 4-tier hints. Values come from `lib/physics/phenomena.ts`.
+- **`/teach`**:
+  - The class view shows a step-validity heatmap (stage × property), the reasoning-route split, recoverable-error ranking with recovery rate, and each student's path drawn on the graph with the point where they diverged. The 32 mock students are scripted step sequences run through the **real validator**.
+  - A **graph authoring tool** lets you edit nodes, edges, paths, hints and interventions, with live checks for cycles, unreachable goals, unproduced requirements and unreadable formulas, plus JSON export.
+- **`/parents`**: mastery by phenomenon category and problem-solving skill, reasoning-quality insights such as "isolated the variable but missed a domain constraint", and at-home discussion prompts.
+- **`/features`**: feature sheets for students, instructors and parents.
+
 ## The reactive learning engine
 
 ```
@@ -130,5 +185,5 @@ tests/                  Vitest suites
 - Map missions against the current Grade 11/12 and Egyptian Baccalaureate syllabi.
 - Add a backend (accounts, PostgreSQL, event store) so the learner model and waitlist persist beyond the browser.
 - Add a teacher console and parent summaries, and an authoring tool for new missions.
-- Add SymPy server-side validation for richer symbolic work.
+- Add SymPy (restricted language, explicit assumptions, time limits) and Pint behind `/api/workbench/validate` as a second opinion to the numeric checks.
 - Run a pilot with pre/post transfer tests and pricing experiments.

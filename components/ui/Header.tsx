@@ -10,10 +10,11 @@ export function Header({ cta = true }: { cta?: boolean }) {
         <Logo />
         <nav className="flex items-center gap-1 sm:gap-2">
           {[
-            ["/#how", "إزاي بنتعلم", "hidden sm:inline-flex"],
-            ["/#missions", "المهمات", "hidden sm:inline-flex"],
+            ["/learn", "المهمات", "hidden lg:inline-flex"],
+            ["/workbench", "المختبر الرياضي", "hidden sm:inline-flex"],
+            ["/phenomena", "الظواهر", "hidden md:inline-flex"],
             ["/play", "ملعب التجارب", "inline-flex"],
-            ["/#pricing", "الأسعار", "hidden md:inline-flex"],
+            ["/features", "لكل واحد", "hidden lg:inline-flex"],
           ].map(([href, label, cls]) => (
             <Button key={href} asChild variant="ghost" size="sm" className={cls}>
               <Link href={href}>{label}</Link>
