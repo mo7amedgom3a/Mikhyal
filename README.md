@@ -99,6 +99,18 @@ Students solve step by step. Each step is a structured object (the wire format t
   - quantum and relativistic: wave–particle duality, tunnelling, Unruh (advanced, optional).
 
   Each module has a description, its famous experiment, the Workbench equation chain and checks, a graded mission (any unit), and 4-tier hints. Values come from `lib/physics/phenomena.ts`.
+- **«شوف إزاي بتشتغل» simulations** (`components/phenomena/sims/`). Each page lazy-loads one interactive sim with sliders, live readouts, a "notice" caption, guided observations that tick ✓, and the mechanism step by step:
+  - **Magnetism**: field rings that circulate by the right-hand rule, and a draggable compass pulled between Earth's field and the wire's.
+  - **Hall effect**: canvas carriers deflected by the Lorentz force; the edge charge builds until the voltage settles. Switching between electrons and holes flips the sign.
+  - **Photoelectric**: photons coloured by wavelength; no emission below f₀ whatever the intensity. Includes a Mafs plot of K_max against f.
+  - **Thermal expansion**: rails closing their gap, or buckling when there is none, a jiggling atom lattice, and a bimetallic strip.
+  - **Phase transitions**: the molecules in a beaker change state, alongside a live heating curve with its mL plateaus.
+  - **Entropy**: hot and cold molecules mix through elastic collisions while ΔS rises, plus a "rewind the film" button.
+  - **Double slit**: electrons arrive one by one, sampled from |ψ|², and build the fringes. Options for one slit or a which-path detector.
+  - **Tunnelling**: the barrier and wavefunction in Mafs, with a Monte Carlo counter that converges to T ≈ e^(−2κL).
+  - **Unruh** (conceptual): an inertial vacuum next to an accelerated glow, and a log–log plot of T against a.
+
+  The animation and drawing use SVG, Canvas 2D, Mafs and @use-gesture. The physics comes from pure, unit-tested helpers in `lib/physics/phenomena.ts`. With reduced motion, each sim shows a static end state.
 - **`/teach`**:
   - The class view shows a step-validity heatmap (stage × property), the reasoning-route split, recoverable-error ranking with recovery rate, and each student's path drawn on the graph with the point where they diverged. The 32 mock students are scripted step sequences run through the **real validator**.
   - A **graph authoring tool** lets you edit nodes, edges, paths, hints and interventions, with live checks for cycles, unreachable goals, unproduced requirements and unreadable formulas, plus JSON export.

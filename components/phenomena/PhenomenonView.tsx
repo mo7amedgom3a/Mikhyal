@@ -13,8 +13,10 @@ import { MathText } from "@/components/ui/MathText";
 import { Tex } from "@/components/ui/Tex";
 import { TIER_LABEL } from "@/components/workbench/StepCard";
 import { PhenomenonIcon } from "./icons";
+import { PHENOMENON_SIMS } from "./sims";
 
 export function PhenomenonView({ module: m }: { module: PhenomenonModule }) {
+  const Sim = PHENOMENON_SIMS[m.id];
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<NumericResult | null>(null);
   const [hintLevel, setHintLevel] = useState(0);
@@ -72,6 +74,8 @@ export function PhenomenonView({ module: m }: { module: PhenomenonModule }) {
           </p>
         </section>
       </div>
+
+      {Sim && <Sim />}
 
       <section className="space-y-3 rounded-[20px] border-2 border-border bg-card p-5">
         <h2 className="flex items-center gap-2 font-bold text-ink">
