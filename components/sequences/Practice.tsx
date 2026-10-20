@@ -6,14 +6,14 @@ import { Input } from "@/components/ui/input";
 import { MathText } from "@/components/ui/MathText";
 import { Tex } from "@/components/ui/Tex";
 import { parseNumber } from "@/lib/sequences";
-import { PRACTICE, type PracticeQuestion } from "@/lib/sequences/practice";
+import type { PracticeQuestion } from "@/lib/sequences/practice";
 import { cn } from "@/lib/utils";
 import { useLessonTracker } from "./tracker";
 
-export function Practice() {
+export function Practice({ questions }: { questions: PracticeQuestion[] }) {
   return (
     <ol className="space-y-4">
-      {PRACTICE.map((q, i) => (
+      {questions.map((q, i) => (
         <li key={q.id}>
           <QuestionCard q={q} index={i + 1} />
         </li>
@@ -43,9 +43,9 @@ function QuestionCard({ q, index }: { q: PracticeQuestion; index: number }) {
         if (v === null) {
           ok = false;
           messages.push(`أكمل الخانة ${f.label} برقم.`);
-        } else if (Math.abs(v - f.answer) > 1e-9) {
+        } else if (Math.abs(v - f.answer) > (f.tolerance ?? 1e-9)) {
           ok = false;
-          const known = f.wrong?.find((w) => Math.abs(w.value - v) < 1e-9);
+          const known = f.wrong?.find((w) => Math.abs(w.value - v) <= (f.tolerance ?? 1e-9));
           messages.push(known ? known.why : `راجع ${f.label}`);
         }
       }
@@ -97,9 +97,9 @@ function QuestionCard({ q, index }: { q: PracticeQuestion; index: number }) {
               disabled={solved}
               onClick={() => setPicked(o.id)}
               className={cn("rounded-[14px] border-2 px-3 py-3 text-lg transition-colors", picked === o.id ? "border-primary bg-primary-soft" : "border-border bg-surface hover:border-primary")}
-              dir="ltr"
+              dir={o.text ? "rtl" : "ltr"}
             >
-              <Tex>{o.tex}</Tex>
+              {o.text ? <MathText>{o.text}</MathText> : <Tex>{o.tex ?? ""}</Tex>}
             </button>
           ))}
         </div>

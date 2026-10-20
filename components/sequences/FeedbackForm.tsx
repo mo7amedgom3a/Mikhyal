@@ -37,7 +37,7 @@ function ScaleRow({ label, low, high, value, onChange }: { label: string; low: s
 }
 
 /** Short end-of-lesson survey; the student's in-lesson activity is attached automatically. */
-export function FeedbackForm({ lessonId }: { lessonId: string }) {
+export function FeedbackForm({ lessonId, topic }: { lessonId: string; topic: string }) {
   const { activity, startedAt } = useLessonTracker();
   const [before, setBefore] = useState<Scale | null>(null);
   const [after, setAfter] = useState<Scale | null>(null);
@@ -92,7 +92,7 @@ export function FeedbackForm({ lessonId }: { lessonId: string }) {
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <ScaleRow label="قبل هذا الدرس، كم كنت تفهم الصيغة الارتدادية؟" low="لم أفهمها" high="فاهم تمامًا" value={before} onChange={setBefore} />
+      <ScaleRow label={`قبل هذا الدرس، كم كنت تفهم ${topic}؟`} low="لم أفهمها" high="فاهم تمامًا" value={before} onChange={setBefore} />
       <ScaleRow label="والآن بعد التجربة، كم تفهمها؟" low="لم أفهمها" high="فاهم تمامًا" value={after} onChange={setAfter} />
       <ScaleRow label="هل ساعدتك المحاكاة والرسوم على الفهم؟" low="لم تساعد" high="ساعدت جدًا" value={sims} onChange={setSims} />
       <fieldset className="space-y-2 rounded-[14px] border-2 border-border bg-surface p-3">

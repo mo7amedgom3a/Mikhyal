@@ -1,5 +1,6 @@
 "use client";
 import { BookOpen, Lightbulb, MessageSquareHeart, PencilLine, Repeat, Scale, Target } from "lucide-react";
+import { PRACTICE } from "@/lib/sequences/practice";
 import { Badge } from "@/components/ui/badge";
 import { MathText } from "@/components/ui/MathText";
 import { Tex } from "@/components/ui/Tex";
@@ -9,6 +10,7 @@ import { Practice } from "./Practice";
 import { RaceSim } from "./RaceSim";
 import { StairsSim } from "./StairsSim";
 import { TermNeighbours } from "./TermNeighbours";
+import { Section } from "./LessonSection";
 import { LessonTrackerProvider } from "./tracker";
 
 export const LESSON_ID = "arithmetic-sequences";
@@ -36,20 +38,6 @@ const SECTIONS = [
   ["practice", "تدرّب"],
   ["feedback", "رأيك"],
 ] as const;
-
-function Section({ id, icon: Icon, title, children }: { id: string; icon: typeof BookOpen; title: string; children: React.ReactNode }) {
-  return (
-    <section id={id} className="scroll-mt-20 space-y-4">
-      <h2 className="flex items-center gap-2 font-display text-3xl font-extrabold text-ink">
-        <span className="grid size-10 place-items-center rounded-[12px] bg-primary-soft text-primary">
-          <Icon className="size-5" aria-hidden />
-        </span>
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
 
 export function SequencesLesson() {
   return (
@@ -200,7 +188,7 @@ export function SequencesLesson() {
           <p className="text-[15px] leading-7 text-ink-2">
             <MathText>{String.raw`اكتب الأعداد في الخانات (يمكن كتابة سالب مثل -3 أو كسر مثل 1/2). إذا أخطأت ستظهر لك ملاحظة عن سبب الخطأ، وبعد 3 محاولات يظهر الحل.`}</MathText>
           </p>
-          <Practice />
+          <Practice questions={PRACTICE} />
         </Section>
 
         <Section id="feedback" icon={MessageSquareHeart} title="رأيك يهمّنا">
@@ -208,7 +196,7 @@ export function SequencesLesson() {
             <p className="text-[15px] leading-7 text-ink-2">
               هذه طريقة تعلّم جديدة نجرّبها معكم لأول مرة. أخبرونا بصراحة: هل ساعدتكم المحاكاة على الفهم؟ (لا توجد إجابات صحيحة أو خاطئة، والاسم اختياري.)
             </p>
-            <FeedbackForm lessonId={LESSON_ID} />
+            <FeedbackForm lessonId={LESSON_ID} topic="الصيغة الارتدادية" />
           </div>
         </Section>
       </main>
