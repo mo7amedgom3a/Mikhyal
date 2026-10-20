@@ -50,6 +50,17 @@ Constructive puzzles with no Run button. The student builds, a deterministic sol
   - A new sandbox only needs a model, a solver, a board and levels.
 - Missions link to their related sandbox from the reflection step: Ohm's law → circuits; vectors and statics → force table.
 
+## Math lesson: arithmetic sequences & the recursive formula (`/sequences`)
+
+A full interactive lesson built for a real classroom validation (المتتاليات الحسابية والصيغة الارتدادية, textbook pp. 19–20):
+
+- **Recap & definition**: click any term to see $a_{n-1}$, $a_n$, $a_{n+1}$; glossary of the lesson terms.
+- **Staircase sim**: sliders for $a_1$, $d$ and the number of terms; each term is revealed by one recursive step $a_n = a_{n-1} + d$ (bars or number-line view), with small challenges.
+- **Race sim**: recursive (n − 1 additions) vs. the general term $a_n = a_1 + (n-1)d$ (one step), with the points $(n, a_n)$ plotted on their line of slope $d$.
+- **Detective**: type any list (fractions and Arabic digits accepted); it checks the differences, shows where they break, and flags geometric lists such as homework Q15.
+- **Practice**: textbook-style questions with targeted feedback for common mistakes (e.g. using $n$ instead of $n-1$).
+- **Feedback survey**: understanding before/after, sim helpfulness, comparison with class, free text. The student's activity (time on page, sims used, practice attempts) is attached automatically and POSTed to `/api/feedback`. Each entry is logged as a `[mikhyal-feedback] {json}` line in the server log; set `FEEDBACK_WEBHOOK_URL` to also forward it (e.g. a Google Apps Script that appends rows to a Sheet).
+
 ## Mathematical Workbench: grading reasoning, not just answers (`/workbench`)
 
 Students solve step by step. Each step is a structured object (the wire format the backend validates), not a string:
