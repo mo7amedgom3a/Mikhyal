@@ -8,13 +8,15 @@ export interface PracticeField {
   /** Shown before the box; may embed $math$, e.g. "$a_1 =$". */
   label: string;
   answer: number;
+  /** Accepted distance from the answer, for rounded results (default: exact). */
+  tolerance?: number;
   /** Specific wrong values and why a student usually lands on them. */
   wrong?: { value: number; why: string }[];
 }
 
 export type PracticeQuestion =
   | { id: string; kind: "fields"; prompt: string; fields: PracticeField[]; hint: string; solution: string }
-  | { id: string; kind: "choice"; prompt: string; options: { id: string; tex: string }[]; answer: string; why: Record<string, string>; hint: string; solution: string };
+  | { id: string; kind: "choice"; prompt: string; options: { id: string; tex?: string; text?: string }[]; answer: string; why: Record<string, string>; hint: string; solution: string };
 
 export const PRACTICE: PracticeQuestion[] = [
   {

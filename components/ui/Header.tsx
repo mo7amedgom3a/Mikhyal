@@ -10,7 +10,7 @@ export function Header({ cta = true }: { cta?: boolean }) {
         <Logo />
         <nav className="flex items-center gap-1 sm:gap-2">
           {[
-            ["/sequences", "المتتاليات", "inline-flex"],
+            ["/lessons", "دروس الرياضيات", "inline-flex"],
             ["/learn", "المهمات", "hidden lg:inline-flex"],
             ["/workbench", "المختبر الرياضي", "hidden sm:inline-flex"],
             ["/phenomena", "الظواهر", "hidden md:inline-flex"],
