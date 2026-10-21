@@ -114,5 +114,7 @@ export const ENDPOINTS: Endpoint[] = [
   E("GET", "/topics/{slug}", "topic", "Knowledge base", "Topic outline, timeline and FAQ", { response: D.Topic }),
   E("GET", "/elements", "elements", "Knowledge base", "Element data (Z, N, shells, radii, isotopes)"),
   E("GET", "/elements/{symbol}", "elementBySymbol", "Knowledge base", "One element", { response: D.ElementRecord }),
+  E("GET", "/atom-models", "atomModels", "Knowledge base", "How the atom was imagined: historical models in order"),
+  E("GET", "/particles", "particles", "Knowledge base", "Proton, neutron, electron: charge, mass, location"),
   E("GET", "/datasets/{id}", "dataset", "Knowledge base", "Experimental dataset (e.g. dst_geiger_marsden_1913)", { response: D.Dataset }),
 ];

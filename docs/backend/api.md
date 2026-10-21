@@ -11,7 +11,7 @@ Base URL: `/api/v1`. JSON in, JSON out. Errors use one envelope:
 - **Ids or slugs:** content endpoints accept the id (`msn_braking`) or the slug (`braking`).
 - **Lists:** `?q=&type=&subject=&concept=&status=&cursor=&limit=` → `{ items, total, nextCursor }`.
 
-81 endpoints. Source of truth: `lib/server/endpoints.ts` → handlers in `lib/server/routes.ts` → services in `lib/server/services/*`.
+83 endpoints. Source of truth: `lib/server/endpoints.ts` → handlers in `lib/server/routes.ts` → services in `lib/server/services/*`.
 
 ## Meta
 
@@ -167,6 +167,8 @@ Base URL: `/api/v1`. JSON in, JSON out. Errors use one envelope:
 | GET | `/topics/{slug}` | Topic outline, timeline and FAQ | any | — | Topic |
 | GET | `/elements` | Element data (Z, N, shells, radii, isotopes) | any | — | JSON |
 | GET | `/elements/{symbol}` | One element | any | — | ElementRecord |
+| GET | `/atom-models` | How the atom was imagined: historical models in order | any | — | JSON |
+| GET | `/particles` | Proton, neutron, electron: charge, mass, location | any | — | JSON |
 | GET | `/datasets/{id}` | Experimental dataset (e.g. dst_geiger_marsden_1913) | any | — | Dataset |
 
 ## Example flows

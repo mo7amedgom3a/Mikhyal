@@ -6,7 +6,9 @@
 import type {
   AgentRun,
   Dataset,
+  AtomModelRecord,
   ElementRecord,
+  ParticleRecord,
   GeneratedLesson,
   Topic,
   AIGenerationJob,
@@ -40,7 +42,7 @@ import type {
 import { CONCEPTS, OUTCOMES, SUBJECTS, UNITS } from "../seed/curriculum";
 import { buildContentSeed } from "../seed/content";
 import { ASSIGNMENTS, CLASSROOMS, ENROLLMENTS, PARENT_LINKS, TEMPLATES, USERS } from "../seed/people";
-import { ATOMIC_CONCEPTS, ATOMIC_EQUATIONS, ATOMIC_TOPIC, ELEMENTS, GEIGER_MARSDEN } from "../seed/atomic";
+import { ATOM_MODELS, ATOMIC_CONCEPTS, ATOMIC_EQUATIONS, ATOMIC_TOPIC, ELEMENTS, GEIGER_MARSDEN, PARTICLES } from "../seed/atomic";
 
 export interface Repository<T extends { id: string }> {
   list(filter?: (item: T) => boolean): T[];
@@ -118,6 +120,8 @@ function createStore() {
     elements: new MemoryCollection<ElementRecord>(ELEMENTS),
     datasets: new MemoryCollection<Dataset>([GEIGER_MARSDEN]),
     topics: new MemoryCollection<Topic>([ATOMIC_TOPIC]),
+    atomModels: new MemoryCollection<AtomModelRecord>(ATOM_MODELS),
+    particles: new MemoryCollection<ParticleRecord>(PARTICLES),
     lessons: new MemoryCollection<GeneratedLesson>([]),
     agentRuns: new MemoryCollection<AgentRun>([]),
   };

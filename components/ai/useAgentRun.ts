@@ -15,6 +15,8 @@ export function useAgentRun() {
   const [steps, setSteps] = useState<AgentStep[]>([]);
   const [error, setError] = useState<string | null>(null);
   const stop = useRef<(() => void) | null>(null);
+  /** Finishes the replay early (skip) or normally; resolves start()'s promise either way. */
+  const finishRef = useRef<(() => void) | null>(null);
 
   useEffect(() => () => stop.current?.(), []);
 
@@ -30,10 +32,13 @@ export function useAgentRun() {
       setPhase("streaming");
       return await new Promise<AgentRun>((resolve) => {
         const finish = () => {
+          finishRef.current = null;
+          stop.current?.();
           setSteps(r.steps);
           setPhase("done");
           resolve(r);
         };
+        finishRef.current = finish;
         stop.current = agentService.stream(r.id, { step: (s) => setSteps((xs) => [...xs, s]), done: finish, error: finish }, opts.speed ?? 2.5);
       });
     } catch (e) {
@@ -43,13 +48,7 @@ export function useAgentRun() {
     }
   }, []);
 
-  const skip = useCallback(() => {
-    stop.current?.();
-    if (run) {
-      setSteps(run.steps);
-      setPhase("done");
-    }
-  }, [run]);
+  const skip = useCallback(() => finishRef.current?.(), []);
 
   return { phase, run, steps, error, start, skip };
 }

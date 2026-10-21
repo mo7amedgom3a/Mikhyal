@@ -5,6 +5,9 @@ import { validateSpec } from "@/lib/server/ai/tools";
 import { bohrEnergy, closestApproach, fractionBeyond, rutherfordAngle, sampleAngles, trajectory, transitionWavelength } from "@/lib/physics/atomic";
 import { rng } from "@/lib/workbench/algebra";
 import type { AgentRun, UiBlock, UiSpec } from "@/lib/domain";
+import { ATOM_MODELS, ELEMENTS, PARTICLES } from "@/lib/server/seed/atomic";
+import { compileRule } from "@/lib/engines/outcomeRules";
+import { LIBRARIES } from "@/lib/server/ai/catalog";
 
 type Handler = (req: Request, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>;
 
@@ -41,6 +44,26 @@ describe("atomic physics", () => {
     expect(ru.filter((a) => a > 90).length).toBeGreaterThan(0);
     expect(ru.filter((a) => a > 90).length / ru.length).toBeLessThan(0.01);
     expect(fractionBeyond(90, 79, 5, 2000)).toBeLessThan(0.01);
+  });
+});
+
+describe("atomic knowledge base", () => {
+  it("copper record is self-consistent", () => {
+    const cu = ELEMENTS.find((e) => e.symbol === "Cu")!;
+    expect(cu.shells.reduce((a, b) => a + b, 0)).toBe(cu.Z);
+    expect(cu.Z + cu.neutrons).toBe(cu.massNumber);
+    expect(cu.isotopes.reduce((a, i) => a + i.abundance, 0)).toBeCloseTo(100, 1);
+    // FCC: atoms touch along the face diagonal, a = 2√2 r.
+    expect(cu.material!.latticeConstantPm / (2 * Math.SQRT2)).toBeCloseTo(cu.atomicRadiusPm, -1);
+    expect(cu.material!.zoomLevels.map((z) => z.sizeM)).toEqual([...cu.material!.zoomLevels.map((z) => z.sizeM)].sort((a, b) => b - a));
+  });
+
+  it("every element's shells hold Z electrons; particles balance charge", () => {
+    for (const e of ELEMENTS) expect(e.shells.reduce((a, b) => a + b, 0), e.symbol).toBe(e.Z);
+    const q = Object.fromEntries(PARTICLES.map((p) => [p.key, p.chargeE]));
+    expect(q.proton + q.electron).toBe(0);
+    expect(q.neutron).toBe(0);
+    expect(ATOM_MODELS.length).toBeGreaterThanOrEqual(6);
   });
 });
 
@@ -84,7 +107,18 @@ describe("AI agents over the API", () => {
     const ui = run.output!.ui!;
     expect(validateSpec(ui).valid).toBe(true);
     const scenes = flat(ui.blocks).filter((b) => b.type === "scene").map((b) => (b as { component: string }).component);
-    expect(scenes).toEqual(expect.arrayContaining(["rutherford_scattering", "atom_model", "energy_levels", "plum_pudding"]));
+    expect(scenes).toEqual(expect.arrayContaining(["rutherford_scattering", "atom_model", "energy_levels", "plum_pudding", "model_gallery", "atom_3d", "nucleus_3d", "copper_zoom"]));
+    for (const c of scenes) expect(LIBRARIES.some((l) => l.provides.includes(`scene:${c}`)), c).toBe(true);
+    expect(ui.libraries).toContain("three-scenes");
+    expect(tools).toEqual(expect.arrayContaining(["get_atom_models", "get_particles"]));
+    // Copper readouts are computed from the stored material data: ≈ 8.5e22 free electrons per cm³.
+    const copper = flat(ui.blocks).find((b) => b.type === "sim" && b.id === "copper") as Extract<UiBlock, { type: "sim" }>;
+    const free = copper.readouts.find((r) => r.label.includes("حرة"))!;
+    expect(Number(compileRule(free.expr, ["size", "level"]).evaluate({ size: 1e-3, level: 0 }))).toBeCloseTo(8.49e22, -21);
+    // The 3D atom: nucleus holds > 99.9% of the mass for copper.
+    const atom3d = flat(ui.blocks).find((b) => b.type === "sim" && b.id === "atom3d") as Extract<UiBlock, { type: "sim" }>;
+    const share = atom3d.readouts.find((r) => r.unit === "%")!;
+    expect(Number(compileRule(share.expr, ["Z", "N"]).evaluate({ Z: 29, N: 34 }))).toBeGreaterThan(99.9);
     // Data comes from the store: the Geiger–Marsden points are the dataset's counts.
     const plot = flat(ui.blocks).find((b) => b.type === "plot") as Extract<UiBlock, { type: "plot" }>;
     expect(plot.points?.length).toBe(11);
@@ -102,8 +136,20 @@ describe("AI agents over the API", () => {
     const run = r.json as AgentRun;
     expect(run.steps.some((s) => s.type === "tool_call" && s.tool === "answer_faq")).toBe(true);
     expect(run.output!.message.length).toBeGreaterThan(40);
+    const cu = await call(R.aiRunCreate as Handler, { body: { agent: "advisor", prompt: "إزاي النحاس بيوصّل الكهربا؟", context: { lessonSlug: "atomic-structure" } } });
+    expect(JSON.stringify(cu.json.output.ui)).toContain("copper-facts");
+    const cloud = await call(R.aiRunCreate as Handler, { body: { agent: "advisor", prompt: "يعني إيه سحابة إلكترونية؟", context: { lessonSlug: "atomic-structure" } } });
+    expect(JSON.stringify(cloud.json.output.ui)).toContain("atom_3d");
     const p = await call(R.aiRunCreate as Handler, { body: { agent: "advisor", prompt: "أذاكر إيه الجاي؟" } });
     expect(p.json.steps.some((s: { type: string; tool?: string }) => s.type === "tool_call" && s.tool === "get_learner_state")).toBe(true);
+  });
+
+  it("serves atom models in order and particles", async () => {
+    const m = await call(R.atomModels as Handler);
+    const years = m.json.items.map((x: { year: number }) => x.year);
+    expect(years).toEqual([...years].sort((a: number, b: number) => a - b));
+    const p = await call(R.particles as Handler);
+    expect(p.json.items.map((x: { key: string }) => x.key).sort()).toEqual(["electron", "neutron", "proton"]);
   });
 
   it("invokes a tool directly and streams a run as SSE", async () => {

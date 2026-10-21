@@ -191,12 +191,12 @@ GET /ai/runs/{id}/stream
 ```
 
 - **Tools** (`GET /ai/tools`):
-  - knowledge: `search_knowledge`, `get_topic`, `get_concepts`, `get_equations`, `get_elements`, `get_dataset`;
+  - knowledge: `search_knowledge`, `get_topic`, `get_concepts`, `get_equations`, `get_elements`, `get_dataset`, `get_atom_models`, `get_particles`;
   - building and publishing: `list_libraries`, `compose_block`, `validate_ui`, `publish_lesson`;
   - advising: `answer_faq`, `get_learner_state`, `recommend_content`.
 
   Each one is also callable directly at `POST /ai/tools/{name}/invoke`.
-- **Libraries** (`GET /ai/libraries`): GenUI core, KaTeX, Mafs, whitelisted mathjs rules, SVG scenes (atom model, plum pudding, Bohr levels), canvas particles (Rutherford scattering), atomic-physics models and GSAP. A generated spec may only use scenes that some library provides.
+- **Libraries** (`GET /ai/libraries`): GenUI core, KaTeX, Mafs, whitelisted mathjs rules, SVG scenes (atom model, plum pudding, Bohr levels, model gallery), three.js scenes (3D atom, nucleus, copper zoom), canvas particles (Rutherford scattering), atomic-physics models and GSAP. A generated spec may only use scenes that some library provides.
 - **Generated UI** (`UiSpec`, `genui/1`):
   - declarative blocks: heading, text, callout, equation, timeline, table, plot, scene, quiz, sim, section;
   - a `sim` block declares sliders (`params`) and choices, where one option can set several values (for example an element sets Z, N and the shells);
@@ -211,6 +211,11 @@ GET /ai/runs/{id}/stream
   - building atoms from protons, neutrons and electron shells;
   - Bohr levels, photon colour and wavelength.
 
+  - how people imagined the atom: a 2D gallery of seven historical models, Democritus to Chadwick (`GET /atom-models`), each with its idea, evidence and flaw;
+  - inside the atom in 3D (three.js / react-three-fiber, lazy-loaded): a dense nucleus of protons (+) and neutrons (0) inside an electron cloud, or on Bohr orbits. A slider magnifies the nucleus from its true size (invisible) upward. Readouts give the charge balance, the nucleus's share of the mass (> 99.9 %) and the atom-to-nucleus size ratio, using particle data from `GET /particles`;
+  - a packed 3D nucleus for He to Au, with radius $1.2A^{1/3}$ fm and density ≈ 2.3×10¹⁷ kg/m³;
+  - a real example, copper: zoom from a wire into the FCC crystal with its free electrons, then one Cu atom (2, 8, 18, 1, with the lone 4s electron highlighted), then the nucleus (29 p + 34 n). A data card covers the configuration, isotopes, lattice and resistivity, and explains why copper conducts.
+
   Opening `/explore/atomic-structure` the first time runs the generator with `publish`; you watch the tool calls stream in, then the published lesson (`GET /lessons/{slug}`) renders. The advisor panel answers questions using the topic FAQ, equations and an attached visual.
 - **Swapping in a real model**: replace the planner in `lib/server/ai/agent.ts` with Claude tool use over the same `TOOL_HANDLERS`. The transcript, streaming and UI contracts stay the same.
 
@@ -219,7 +224,7 @@ GET /ai/runs/{id}/stream
 ```
 lib/domain/*        zod schemas = data structures + relationships (types inferred, OpenAPI generated)
 lib/server/*        simulated backend: in-memory store seeded from the content modules, services, route handlers
-app/api/v1/**       81 REST endpoints (generated from lib/server/endpoints.ts)
+app/api/v1/**       83 REST endpoints (generated from lib/server/endpoints.ts)
 lib/api/*           frontend service layer (typed client, one function per endpoint, TanStack Query hooks)
 lib/engines/*       client engine registry: hydrates content records, runs code engines or declarative outcome rules
 lib/server/ai/*     agents (advisor, generator), tool handlers, block builders, tool/library catalog

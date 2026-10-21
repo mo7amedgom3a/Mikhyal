@@ -92,6 +92,8 @@ erDiagram
   AGENT_RUN }o--o| TOPIC : draws_on
   ELEMENT_RECORD }o--o{ UI_SPEC : feeds
   DATASET }o--o{ UI_SPEC : feeds
+  ATOM_MODEL_RECORD }o--o{ UI_SPEC : feeds
+  PARTICLE_RECORD }o--o{ UI_SPEC : feeds
 ```
 
 `CONTENT_ITEM` is the shared `ContentBase` of Mission, Lab, Phenomenon, WorkbenchProblem and Exam.
@@ -109,7 +111,7 @@ erDiagram
 | `runtime.ts` | Session, LearningEvent (with optional `evidence` for the learner model), ConceptMastery, LearnerModel, Recommendation, TutorTurn |
 | `reports.ts` | ClassReport (step-validity heatmap, misconceptions, reasoning routes, per-student paths), ParentReport, StudentDashboard |
 | `authoring.ts` | Template (slots + skeleton), StudioDraft (source: template / scratch / fork / ai, live validation issues), ContentVersion, AIGenerationRequest / AIGenerationJob |
-| `ai.ts` | ToolLibrary, AiTool, UiBlock / UiSpec (generative UI `genui/1`), AgentStep, RunRequest, AgentRun, GeneratedLesson, ElementRecord, Dataset, Topic (knowledge-base outline, timeline, FAQ) |
+| `ai.ts` | ToolLibrary, AiTool, UiBlock / UiSpec (generative UI `genui/1`), AgentStep, RunRequest, AgentRun, GeneratedLesson, ElementRecord (with optional bulk `material` data and zoom levels), Dataset, AtomModelRecord (historical models), ParticleRecord, Topic (knowledge-base outline, timeline, FAQ) |
 | `requests.ts` | Request bodies for every POST/PUT/PATCH endpoint |
 
 ## Workflows the model supports

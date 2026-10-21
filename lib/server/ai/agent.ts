@@ -8,6 +8,7 @@ import type { AgentRun, AgentStep, RunRequest, UiBlock, UiSpec, User } from "@/l
 import { db, newId, nowIso } from "../db/store";
 import { HttpError } from "../http";
 import { topicOf } from "./builders";
+import { LIBRARIES } from "./catalog";
 import { invokeTool, tokens } from "./tools";
 
 export const MODEL = "mock-planner-1";
@@ -49,6 +50,19 @@ class Recorder {
 
 type SearchResult = { topics: { slug: string; title: string; score: number }[]; concepts: { key: string; title: string }[]; content: { id: string; title: string; href: string }[] };
 
+/** Libraries a spec needs: whichever library provides each block type or scene it uses. */
+function librariesFor(blocks: UiBlock[]) {
+  const used = new Set<string>(["genui-core", "mathjs-rules"]);
+  const need = (feature: string) => LIBRARIES.filter((l) => l.provides.includes(feature)).forEach((l) => used.add(l.id));
+  const walk = (bs: UiBlock[]) =>
+    bs.forEach((b) => {
+      need(b.type === "scene" ? `scene:${b.component}` : b.type);
+      if (b.type === "sim" || b.type === "section") walk(b.children);
+    });
+  walk(blocks);
+  return used;
+}
+
 // ───────────────────────────── Generator ─────────────────────────────
 
 function runGenerator(r: Recorder, req: RunRequest, runId: string) {
@@ -63,8 +77,11 @@ function runGenerator(r: Recorder, req: RunRequest, runId: string) {
   const libs = r.call<{ id: string }[]>("list_libraries", {});
   r.call("get_concepts", { keys: topic.conceptKeys });
   r.call("get_equations", { conceptKeys: topic.conceptKeys });
-  r.call("get_elements", { symbols: ["H", "He", "C", "Au"] });
+  r.call("get_elements", { symbols: ["H", "He", "C", "O", "Cu", "Au"] });
   r.call("get_dataset", { id: "dst_geiger_marsden_1913" });
+  r.think("محتاج كمان تاريخ تخيّل الذرة ومكوّناتها (شحنة وكتلة كل جسيم) عشان أقسام «الخيال» و«رحلة جوه الذرة».");
+  r.call("get_atom_models", {});
+  r.call("get_particles", {});
 
   const full = topicOf(topicSlug);
   const blocks: UiBlock[] = [];
@@ -74,15 +91,7 @@ function runGenerator(r: Recorder, req: RunRequest, runId: string) {
     for (const kind of s.build) children.push(r.call<UiBlock>("compose_block", { kind, topic: topicSlug, section: s.id }));
     blocks.push({ type: "section", id: s.id, title: s.title, children });
   }
-  const used = new Set<string>(["genui-core", "katex", "mathjs-rules"]);
-  const walk = (bs: UiBlock[]) =>
-    bs.forEach((b) => {
-      if (b.type === "plot") used.add("mafs");
-      if (b.type === "scene") used.add(b.component === "rutherford_scattering" ? "canvas-particles" : "svg-scenes");
-      if (b.type === "scene" && (b.component === "rutherford_scattering" || b.component === "energy_levels")) used.add("atomic-physics");
-      if (b.type === "sim" || b.type === "section") walk(b.children);
-    });
-  walk(blocks);
+  const used = librariesFor(blocks);
   const spec: UiSpec = {
     version: "genui/1",
     title: topic.title,
@@ -100,7 +109,8 @@ function runGenerator(r: Recorder, req: RunRequest, runId: string) {
   }
   r.ui(spec);
   const sims = JSON.stringify(spec).match(/"type":"sim"/g)?.length ?? 0;
-  const message = `جهّزت درس «${topic.title}»: ${topic.sections.length} أقسام، ${sims} محاكاة تفاعلية، رسم بيانات جايجر ومارسدن مقابل قانون رذرفورد، وأسئلة تشخيصية. كل حاجة اتبنت من الأدوات والبيانات${lessonSlug ? ` واتنشرت في /explore/${lessonSlug}` : ""}.`;
+  const scenes3d = JSON.stringify(spec).match(/"component":"(atom_3d|nucleus_3d|copper_zoom)"/g)?.length ?? 0;
+  const message = `جهّزت درس «${topic.title}»: ${topic.sections.length} أقسام، ${sims} محاكاة تفاعلية (منها ${scenes3d} مشاهد 3D)، تاريخ تخيّل الذرة، رحلة جوه ذرة النحاس، رسم بيانات جايجر ومارسدن مقابل قانون رذرفورد، وأسئلة تشخيصية. كل حاجة اتبنت من الأدوات والبيانات${lessonSlug ? ` واتنشرت في /explore/${lessonSlug}` : ""}.`;
   r.say(message);
   return { message, ui: spec, lessonSlug };
 }
@@ -155,17 +165,19 @@ function runAdvisor(r: Recorder, req: RunRequest) {
   const searched = topicSlug ? null : r.call<SearchResult>("search_knowledge", { query: req.prompt });
   const slug = topicSlug ?? searched?.topics[0]?.slug;
   if (slug) {
-    const faq = r.call<{ answer: string; conceptKey?: string } | null>("answer_faq", { topic: slug, question: req.prompt });
+    const faq = r.call<{ answer: string; conceptKey?: string; visual?: string } | null>("answer_faq", { topic: slug, question: req.prompt });
     if (faq) {
       const blocks: UiBlock[] = [];
       if (faq.conceptKey) {
         const eqs = r.call<{ latex: string; name: string }[]>("get_equations", { conceptKeys: [faq.conceptKey] });
         blocks.push(...eqs.slice(0, 2).map((e) => ({ type: "equation" as const, latex: e.latex, caption: e.name })));
-        if (faq.conceptKey === "atom.bohr") blocks.push(r.call<UiBlock>("compose_block", { kind: "energy_levels" }));
-        if (faq.conceptKey === "atom.rutherford") blocks.push(r.call<UiBlock>("compose_block", { kind: "scale_callout" }));
+      }
+      if (faq.visual) {
+        r.think(`الإجابة دي أوضح برسمة: هبني «${faq.visual}» من البيانات.`);
+        blocks.push(r.call<UiBlock>("compose_block", { kind: faq.visual, topic: slug }));
       }
       r.say(faq.answer);
-      const ui: UiSpec | undefined = blocks.length ? { version: "genui/1", title: "توضيح", blocks, libraries: ["genui-core", "katex", "mathjs-rules", "svg-scenes", "atomic-physics"] } : undefined;
+      const ui: UiSpec | undefined = blocks.length ? { version: "genui/1", title: "توضيح", blocks, libraries: [...librariesFor(blocks)] } : undefined;
       if (ui) r.ui(ui);
       return { message: faq.answer, ui };
     }

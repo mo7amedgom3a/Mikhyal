@@ -9,6 +9,11 @@ import { badRequest, notFound } from "../http";
 type Section = Topic["sections"][number];
 
 const fmt = (x: number, d = 3) => +x.toPrecision(d);
+/** 1.67e-27 → "1.673\\times10^{-27}" (LaTeX). */
+/** "[Ar] 3d¹⁰ 4s¹" → LaTeX, so the configuration reads left-to-right inside Arabic text. */
+const SUP: Record<string, string> = { "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9" };
+const texConfig = (c: string) => `$\\mathrm{${c.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, (m) => `^{${[...m].map((ch) => SUP[ch]).join("")}}`).replace(/ /g, "\\,")}}$`;
+const texSci = (x: number, d = 3) => x.toExponential(d).replace(/e([+-]\d+)/, (_, k) => `\\times10^{${Number(k)}}`);
 
 function topicOf(slug: string) {
   const t = db().topics.list((x) => x.slug === slug)[0];
@@ -31,8 +36,210 @@ export function equationsFor(conceptKeys: string[]): Equation[] {
   return db().equations.list((e) => e.conceptIds.some((c) => ids.includes(c)));
 }
 
+function particle(key: string) {
+  const p = db().particles.list((x) => x.key === key)[0];
+  if (!p) throw notFound(`particle ${key}`);
+  return p;
+}
+
+const NA = 6.022e23;
+const U_KG = 1.6605e-27;
+
+/** Values a sim choice sets for one element (shared by the 2D/3D atom and nucleus sims). */
+const atomValues = (e: ReturnType<typeof element>) => ({ Z: e.Z, N: e.neutrons, A: e.massNumber, shells: e.shells, symbol: e.symbol, rA: e.atomicRadiusPm, rN: e.nuclearRadiusFm });
+
 const BUILDERS: Record<string, (ctx: { topic?: Topic; section?: Section; equationId?: string }) => UiBlock> = {
   timeline: ({ topic }) => ({ type: "timeline", items: topic!.timeline }),
+
+  model_history: () => {
+    const models = db().atomModels.list().sort((a, b) => a.year - b.year);
+    return {
+      type: "sim",
+      id: "history",
+      title: "معرض نماذج الذرة: اختار عالم",
+      params: [],
+      choices: [{ key: "modelChoice", label: "النموذج", default: 0, options: models.map((m) => ({ label: `${m.scientist} (${m.yearLabel})`, values: { model: m.key, year: m.year } })) }],
+      readouts: [{ label: "السنة", expr: "year", unit: "", digits: 0 }],
+      observations: [
+        { label: "شوف نموذج قبل اكتشاف الإلكترون", when: "year < 1897" },
+        { label: "شوف أول نموذج فيه نواة", when: "year == 1911" },
+        { label: "وصلت للصورة الحديثة (بعد 1925)", when: "year > 1925" },
+      ],
+      children: [{ type: "scene", component: "model_gallery", props: { models }, bind: { model: "model" } }],
+    };
+  },
+
+  atom_3d: () => {
+    const els = ["H", "He", "C", "O", "Na", "Cu"].map(element);
+    const p = particle("proton");
+    const n = particle("neutron");
+    const e = particle("electron");
+    return {
+      type: "sim",
+      id: "atom3d",
+      title: "الذرة في 3D: نواة كثيفة وسحابة إلكترونات",
+      params: [{ key: "zoomExp", label: "تكبير النواة: 10 أس", symbol: "k", min: 0, max: 4.5, step: 0.1, unit: "", default: 3.7 }],
+      choices: [
+        { key: "element", label: "العنصر", default: 2, options: els.map((x) => ({ label: `${x.nameAr} ${x.symbol}`, values: atomValues(x) })) },
+        {
+          key: "viewChoice",
+          label: "طريقة العرض",
+          default: 0,
+          options: [
+            { label: "سحابة إلكترونية (الحديثة)", values: { view: "cloud", orbits: 0 } },
+            { label: "مدارات (بور)", values: { view: "orbits", orbits: 1 } },
+          ],
+        },
+      ],
+      readouts: [
+        { label: "بروتونات +", expr: "Z", unit: "", digits: 0 },
+        { label: "نيوترونات 0", expr: "N", unit: "", digits: 0 },
+        { label: "إلكترونات −", expr: "Z", unit: "", digits: 0 },
+        { label: "الشحنة الكلية", expr: `Z*${p.chargeE} + N*${n.chargeE} + Z*(${e.chargeE})`, unit: "e", digits: 0 },
+        { label: "كتلة النواة من كتلة الذرة", expr: `100*(Z*${p.massU} + N*${n.massU})/(Z*${p.massU} + N*${n.massU} + Z*${e.massU})`, unit: "%", digits: 4 },
+        { label: "الذرة أكبر من النواة", expr: "rA*1000/rN", unit: "مرة", digits: 2 },
+        { label: "تكبير النواة في الرسم", expr: "10^zoomExp", unit: "×", digits: 2 },
+      ],
+      observations: [
+        { label: "رجّع التكبير لـ 1× — النواة الحقيقية بتختفي!", when: "zoomExp < 0.3" },
+        { label: "بدّل لعرض المدارات (صورة بور)", when: "orbits == 1" },
+        { label: "افتح ذرة النحاس: 29 إلكترون", when: "Z == 29" },
+      ],
+      children: [{ type: "scene", component: "atom_3d", props: {}, bind: { Z: "Z", N: "N", shells: "shells", symbol: "symbol", view: "view", zoomExp: "zoomExp", rA: "rA", rN: "rN" } }],
+    };
+  },
+
+  particles_table: () => {
+    const ps = db().particles.list();
+    const p = particle("proton");
+    const e = particle("electron");
+    return {
+      type: "section",
+      id: "particles",
+      title: "مكوّنات الذرة",
+      children: [
+        {
+          type: "table",
+          caption: "الجسيمات الثلاثة اللي بتتكون منها كل الذرات العادية",
+          columns: [
+            { key: "name", label: "الجسيم" },
+            { key: "charge", label: "الشحنة" },
+            { key: "massU", label: "الكتلة (u)" },
+            { key: "massKg", label: "الكتلة (kg)" },
+            { key: "location", label: "مكانه" },
+            { key: "discovery", label: "اكتشفه" },
+          ],
+          rows: ps.map((x) => ({
+            name: `${x.nameAr} ${x.symbol}`,
+            charge: x.chargeE > 0 ? `$+${x.chargeE}e$` : x.chargeE < 0 ? `$${x.chargeE}e$` : "$0$ (متعادل)",
+            massU: x.massU,
+            massKg: `$${texSci(x.massKg)}$`,
+            location: x.location,
+            discovery: x.discovery,
+          })),
+        },
+        { type: "equation", latex: "A = Z + N", caption: "العدد الكتلي = بروتونات + نيوترونات" },
+        { type: "equation", latex: "q_{\\text{atom}} = Z(+e) + N(0) + Z(-e) = 0", caption: "الذرة المتعادلة: عدد الإلكترونات = عدد البروتونات" },
+        {
+          type: "callout",
+          tone: "insight",
+          title: "البروتون أتقل من الإلكترون كام مرة؟",
+          text: `$\\dfrac{m_p}{m_e} = \\dfrac{${texSci(p.massKg)}}{${texSci(e.massKg)}} \\approx ${Math.round(p.massKg / e.massKg)}$ — عشان كده تقريبًا كل كتلة الذرة في النواة.`,
+        },
+      ],
+    };
+  },
+
+  nucleus_3d: () => {
+    const els = ["He", "C", "O", "Cu", "Au"].map(element);
+    const p = particle("proton");
+    return {
+      type: "sim",
+      id: "nucleus3d",
+      title: "كبّر النواة: بروتونات ونيوترونات متكدسة",
+      params: [],
+      choices: [{ key: "element", label: "النواة", default: 3, options: els.map((x) => ({ label: `${x.nameAr} ${x.symbol}`, values: atomValues(x) })) }],
+      readouts: [
+        { label: "نصف قطر النواة (1.2·A^⅓)", expr: "1.2*A^(1/3)", unit: "fm", digits: 2 },
+        { label: "كثافة النواة", expr: `A*${U_KG}/(4/3*pi*(1.2e-15*A^(1/3))^3)`, unit: "kg/m³", digits: 2 },
+        { label: "أكتف من المية", expr: `A*${U_KG}/(4/3*pi*(1.2e-15*A^(1/3))^3)/1000`, unit: "مرة", digits: 2 },
+        { label: "شحنة النواة", expr: `Z*${p.chargeE}`, unit: "e", digits: 0 },
+      ],
+      observations: [{ label: "قارن نواة الهيليوم بنواة الدهب: الكثافة تقريبًا واحدة!", when: "Z == 79" }],
+      children: [{ type: "scene", component: "nucleus_3d", props: {}, bind: { Z: "Z", N: "N", symbol: "symbol" } }],
+    };
+  },
+
+  copper_zoom: () => {
+    const cu = element("Cu");
+    const m = cu.material;
+    if (!m) throw notFound("copper material data");
+    const perCm3 = (m.densityGcm3 / m.molarMassGmol) * NA;
+    return {
+      type: "sim",
+      id: "copper",
+      title: "ادخل جوه سلك نحاس",
+      params: [],
+      choices: [{ key: "levelChoice", label: "المستوى", default: 0, options: m.zoomLevels.map((z, i) => ({ label: `${i + 1}. ${z.title}`, values: { level: i, size: z.sizeM } })) }],
+      readouts: [
+        { label: "عرض اللي بتشوفه", expr: "size", unit: "m", digits: 2 },
+        { label: "العرض ÷ قطر ذرة النحاس", expr: `size/(2*${cu.atomicRadiusPm}e-12)`, unit: "", digits: 2 },
+        { label: "ذرات في 1 cm³", expr: `${fmt(perCm3, 4)}`, unit: "ذرة", digits: 3 },
+        { label: "إلكترونات حرة في 1 cm³", expr: `${fmt(perCm3, 4)}*${m.freeElectronsPerAtom}`, unit: "e⁻", digits: 3 },
+      ],
+      observations: [
+        { label: "ادخل البلّورة وشوف الإلكترونات الحرة", when: "level >= 1" },
+        { label: "وصلت للنواة: 29 بروتون + 34 نيوترون", when: "level == 3" },
+      ],
+      children: [
+        {
+          type: "scene",
+          component: "copper_zoom",
+          props: { levels: m.zoomLevels, latticePm: m.latticeConstantPm, shells: cu.shells, Z: cu.Z, N: cu.neutrons },
+          bind: { level: "level" },
+        },
+      ],
+    };
+  },
+
+  copper_facts: () => {
+    const cu = element("Cu");
+    const m = cu.material!;
+    const a = m.latticeConstantPm;
+    return {
+      type: "section",
+      id: "copper-facts",
+      title: "بطاقة النحاس",
+      children: [
+        {
+          type: "table",
+          columns: [
+            { key: "k", label: "الخاصية" },
+            { key: "v", label: "القيمة" },
+          ],
+          rows: [
+            { k: "العدد الذري Z (بروتونات = إلكترونات)", v: cu.Z },
+            { k: "نيوترونات (أشهر نظير ⁶³Cu)", v: cu.neutrons },
+            { k: "توزيع الإلكترونات على المستويات", v: `$${cu.shells.join(",\\ ")}$` },
+            { k: "التوزيع الإلكتروني", v: cu.electronConfig ? texConfig(cu.electronConfig) : "" },
+            { k: "النظائر", v: cu.isotopes.map((i) => `${cu.symbol}-${i.massNumber}: ${i.abundance}%`).join("  ·  ") },
+            { k: "نصف قطر الذرة", v: `$${cu.atomicRadiusPm}\\,\\mathrm{pm}$` },
+            { k: "البلّورة", v: `مكعب متمركز الأوجه (FCC)، ضلع $${a}\\,\\mathrm{pm}$` },
+            { k: "الكثافة", v: `$${m.densityGcm3}\\,\\mathrm{g/cm^3}$` },
+            { k: "المقاومة النوعية", v: `$${texSci(m.resistivityOhmM, 2)}\\,\\Omega\\cdot\\mathrm{m}$` },
+            { k: "استخدامات", v: m.uses.join("، ") },
+          ],
+        },
+        {
+          type: "callout",
+          tone: "insight",
+          title: "ليه النحاس موصّل ممتاز؟",
+          text: `المستوى الأخير فيه إلكترون واحد بس (${cu.electronConfig ? texConfig(cu.electronConfig) : ""}). في البلّورة الإلكترون ده بيتحرر، فيبقى فيه حوالي $${fmt(((m.densityGcm3 / m.molarMassGmol) * NA * m.freeElectronsPerAtom) / 1e22, 3)}\\times10^{22}$ إلكترون حر في كل سنتيمتر مكعب، جاهزين يتحركوا مع أي جهد.`,
+        },
+        { type: "equation", latex: `a = 2\\sqrt{2}\\,r \\;\\Rightarrow\\; r = \\dfrac{${a}}{2\\sqrt2} \\approx ${fmt(a / (2 * Math.SQRT2), 3)}\\,\\mathrm{pm}`, caption: "في بلّورة FCC الذرات بتلمس بعض على قطر الوجه — نفس نصف قطر ذرة النحاس" },
+      ],
+    };
+  },
 
   plum_pudding: () => ({
     type: "scene",

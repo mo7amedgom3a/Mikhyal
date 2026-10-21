@@ -181,6 +181,8 @@ export const elementBySymbol = route(({ params }) => {
   if (!e) throw notFound(`element ${params.symbol}`);
   return e;
 });
+export const atomModels = route(() => ({ items: db().atomModels.list().sort((a, b) => a.year - b.year) }));
+export const particles = route(() => ({ items: db().particles.list() }));
 export const dataset = route(({ params }) => {
   const d = db().datasets.get(params.id);
   if (!d) throw notFound(`dataset ${params.id}`);

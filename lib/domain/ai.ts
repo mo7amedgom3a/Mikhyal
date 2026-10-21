@@ -229,6 +229,21 @@ export const ElementRecord = named(
     atomicRadiusPm: z.number(),
     nuclearRadiusFm: z.number(),
     isotopes: z.array(z.object({ massNumber: z.number().int(), neutrons: z.number().int(), abundance: z.number() })),
+    electronConfig: z.string().optional(),
+    /** Bulk-material data for elements used as real-world examples (e.g. copper). */
+    material: z
+      .object({
+        crystal: z.enum(["fcc", "bcc", "hcp"]),
+        latticeConstantPm: z.number(),
+        densityGcm3: z.number(),
+        molarMassGmol: z.number(),
+        freeElectronsPerAtom: z.number(),
+        resistivityOhmM: z.number(),
+        uses: z.array(z.string()),
+        /** Zoom path from everyday object to nucleus. */
+        zoomLevels: z.array(z.object({ key: z.string(), title: z.string(), caption: z.string(), sizeM: z.number(), scaleLabel: z.string() })),
+      })
+      .optional(),
   }),
 );
 export type ElementRecord = z.infer<typeof ElementRecord>;
@@ -246,6 +261,41 @@ export const Dataset = named(
 );
 export type Dataset = z.infer<typeof Dataset>;
 
+/** How people imagined the atom: one row per historical model. */
+export const AtomModelRecord = named(
+  "AtomModelRecord",
+  z.object({
+    id: z.string(),
+    key: z.string(),
+    year: z.number().int().openapi({ description: "Negative = BC" }),
+    yearLabel: z.string(),
+    scientist: z.string(),
+    title: z.string(),
+    idea: z.string(),
+    evidence: z.string(),
+    flaw: z.string(),
+    /** How the 2D gallery draws it. */
+    style: z.enum(["solid", "pudding", "nuclear", "orbits", "neutrons", "cloud"]),
+  }),
+);
+export type AtomModelRecord = z.infer<typeof AtomModelRecord>;
+
+export const ParticleRecord = named(
+  "ParticleRecord",
+  z.object({
+    id: z.string(),
+    key: z.enum(["proton", "neutron", "electron"]),
+    nameAr: z.string(),
+    symbol: z.string(),
+    chargeE: z.number(),
+    massU: z.number(),
+    massKg: z.number(),
+    location: z.string(),
+    discovery: z.string(),
+  }),
+);
+export type ParticleRecord = z.infer<typeof ParticleRecord>;
+
 /** A knowledge-base topic the generator draws on (outline, narrative, FAQ). */
 export const Topic = named(
   "Topic",
@@ -262,12 +312,40 @@ export const Topic = named(
         goal: z.string(),
         narrative: z.array(z.string()),
         /** What the generator should build for this section. */
-        build: z.array(z.enum(["timeline", "atom_model", "plum_pudding", "rutherford_scattering", "geiger_marsden_plot", "energy_levels", "isotopes_table", "scale_callout", "quiz", "equations"])),
+        build: z.array(
+          z.enum([
+            "timeline",
+            "model_history",
+            "atom_model",
+            "atom_3d",
+            "nucleus_3d",
+            "particles_table",
+            "plum_pudding",
+            "rutherford_scattering",
+            "geiger_marsden_plot",
+            "energy_levels",
+            "isotopes_table",
+            "scale_callout",
+            "copper_zoom",
+            "copper_facts",
+            "quiz",
+            "equations",
+          ]),
+        ),
         quiz: z.object({ question: z.string(), options: z.array(Choice), correctId: z.string(), explanation: z.string(), feedback: z.record(z.string(), z.string()) }).optional(),
       }),
     ),
     timeline: z.array(z.object({ year: z.string(), title: z.string(), text: z.string() })),
-    faq: z.array(z.object({ question: z.string(), keywords: z.array(z.string()), answer: z.string(), conceptKey: z.string().optional() })),
+    faq: z.array(
+      z.object({
+        question: z.string(),
+        keywords: z.array(z.string()),
+        answer: z.string(),
+        conceptKey: z.string().optional(),
+        /** Block kind (compose_block) the advisor attaches to illustrate the answer. */
+        visual: z.string().optional(),
+      }),
+    ),
   }),
 );
 export type Topic = z.infer<typeof Topic>;

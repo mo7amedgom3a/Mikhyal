@@ -17,6 +17,9 @@ type SimValue = number | string | number[];
 type SimState = Record<string, SimValue>;
 const SimContext = createContext<SimState>({});
 
+/** Integers (counts, years) print exactly; other values keep `digits` decimals' worth of precision. */
+const formatReadout = (v: number, digits: number) => (digits === 0 && Number.isFinite(v) && Math.abs(v) < 1e6 ? String(Math.round(v)) : sci(v, Math.max(2, digits + 1)));
+
 const numericScope = (s: SimState) => Object.fromEntries(Object.entries(s).filter(([, v]) => typeof v === "number")) as Record<string, number>;
 
 /** Renders a "genui/1" spec. Everything on screen comes from the spec; no lesson content lives here. */
@@ -241,8 +244,9 @@ function Sim({ block }: { block: Extract<UiBlock, { type: "sim" }> }) {
               {readouts.map((r) => (
                 <li key={r.label} className="rounded-[12px] border-2 border-border bg-surface px-3 py-1.5" data-readout={r.label}>
                   <p className="text-xs text-ink-3">{r.label}</p>
-                  <p className="overflow-x-auto text-base text-ink" dir="ltr">
-                    <Tex>{`${sci(r.value, Math.max(2, r.digits + 1))}${r.unit ? `\\ \\text{${r.unit.replace(/%/g, "\\%")}}` : ""}`}</Tex>
+                  <p className="flex items-baseline gap-1 overflow-x-auto text-base text-ink" dir="ltr">
+                    <Tex>{formatReadout(r.value, r.digits)}</Tex>
+                    {r.unit && <span className="text-sm text-ink-2">{r.unit}</span>}
                   </p>
                 </li>
               ))}

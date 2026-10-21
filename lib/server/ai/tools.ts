@@ -126,6 +126,16 @@ export const TOOL_HANDLERS: Record<string, Handler> = {
     return { result: ds, summary: `${ds.title}: ${ds.rows.length} قراءة` };
   },
 
+  get_atom_models: () => {
+    const items = db().atomModels.list().sort((a, b) => a.year - b.year);
+    return { result: items, summary: items.map((m) => m.scientist).join(" ← ") };
+  },
+
+  get_particles: () => {
+    const items = db().particles.list();
+    return { result: items, summary: items.map((p) => `${p.nameAr} (${p.chargeE > 0 ? "+" : ""}${p.chargeE}e)`).join("، ") };
+  },
+
   list_libraries: () => ({ result: LIBRARIES, summary: LIBRARIES.map((l) => l.id).join("، ") }),
 
   compose_block: (args) => {
@@ -168,7 +178,7 @@ export const TOOL_HANDLERS: Record<string, Handler> = {
     const q = str(args.question, "question");
     const ranked = t.faq.map((f) => ({ f, s: score(q, f.keywords) })).sort((a, b) => b.s - a.s);
     const best = ranked[0]?.s ? ranked[0].f : null;
-    return { result: best ? { answer: best.answer, conceptKey: best.conceptKey } : null, summary: best ? "لقيت إجابة في قاعدة المعرفة" : "مفيش إجابة مطابقة" };
+    return { result: best ? { answer: best.answer, conceptKey: best.conceptKey, visual: best.visual } : null, summary: best ? "لقيت إجابة في قاعدة المعرفة" : "مفيش إجابة مطابقة" };
   },
 
   get_learner_state: (_args, ctx) => {
