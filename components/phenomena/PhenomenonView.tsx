@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, BookOpen, Calculator, CircleCheck, FlaskConical, Lightbulb, Sigma, TriangleAlert } from "lucide-react";
 import { checkNumeric, type NumericResult } from "@/lib/engine/evaluator";
+import { gradingService } from "@/lib/api/services";
 import { CATEGORY_LABEL, type PhenomenonModule } from "@/lib/phenomena";
 import { HINT_TIERS } from "@/lib/workbench/types";
 import { NumericInput } from "@/components/lesson/NumericInput";
@@ -22,8 +23,14 @@ export function PhenomenonView({ module: m }: { module: PhenomenonModule }) {
   const [hintLevel, setHintLevel] = useState(0);
   const [attempts, setAttempts] = useState(0);
 
-  const check = () => {
-    const r = checkNumeric(answer, m.mission.answer, m.mission.wrongValues);
+  const check = async () => {
+    let r: NumericResult;
+    try {
+      const g = await gradingService.phenomenonAnswer(m.id, answer);
+      r = g.status === "incorrect" ? { status: "incorrect", diagnosis: g.diagnosis } : { status: g.status };
+    } catch {
+      r = checkNumeric(answer, m.mission.answer, m.mission.wrongValues);
+    }
     setResult(r);
     if (r.status !== "correct") setAttempts((a) => a + 1);
   };

@@ -12,7 +12,7 @@ const ICONS: Record<string, LucideIcon> = { Zap, Crosshair };
 export function PlaygroundIndex() {
   const [progress, setProgress] = useState<SandboxProgress>({});
   useEffect(() => {
-    setProgress(loadProgress());
+    loadProgress().then(setProgress);
   }, []);
   return (
     <main className="mx-auto max-w-[1100px] space-y-8 px-4 py-8">

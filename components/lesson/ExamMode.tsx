@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ChartColumn, CircleCheck, CircleX, ClipboardCheck, Clock, RotateCcw, Timer, Trophy } from "lucide-react";
 import type { ChoiceRule, Mission } from "@/lib/engine/types";
 import { ERROR_LABELS } from "@/lib/engine/pedagogy";
+import { gradingService } from "@/lib/api/services";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,7 @@ interface Answer {
   rule?: ChoiceRule;
 }
 
-export function ExamMode({ mission, onAnswer }: { mission: Mission; onAnswer: (correct: boolean, rule?: ChoiceRule) => void }) {
+export function ExamMode({ mission, examId, onAnswer }: { mission: Mission; examId?: string; onAnswer: (correct: boolean, rule?: ChoiceRule) => void }) {
   const { questions, timeLimitSec } = mission.exam;
   const [started, setStarted] = useState(false);
   const [idx, setIdx] = useState(0);
@@ -25,6 +26,16 @@ export function ExamMode({ mission, onAnswer }: { mission: Mission; onAnswer: (c
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [left, setLeft] = useState(timeLimitSec);
   const finished = answers.length === questions.length || (started && left <= 0);
+
+  // When the attempt ends, the server grades it too (authoritative score for dashboards).
+  const [serverScore, setServerScore] = useState<{ score: number; total: number } | null>(null);
+  useEffect(() => {
+    if (!finished || !examId || serverScore) return;
+    gradingService
+      .submitExam(examId, Object.fromEntries(answers.map((a) => [a.qid, a.choiceId ?? ""])), timeLimitSec - left)
+      .then((r) => setServerScore({ score: r.score, total: r.total }))
+      .catch(() => undefined);
+  }, [finished, examId, serverScore, answers, timeLimitSec, left]);
 
   useEffect(() => {
     if (!started || finished) return;
@@ -43,6 +54,7 @@ export function ExamMode({ mission, onAnswer }: { mission: Mission; onAnswer: (c
   };
 
   const restart = () => {
+    setServerScore(null);
     setAnswers([]);
     setIdx(0);
     setPicked("");
@@ -84,6 +96,11 @@ export function ExamMode({ mission, onAnswer }: { mission: Mission; onAnswer: (c
               النتيجة: <span className="ltr font-latin">{score} / {questions.length}</span>
             </h2>
             {left <= 0 && answers.length < questions.length && <p className="text-sm text-destructive">الوقت خلص قبل ما تكمّل.</p>}
+            {serverScore && (
+              <p className="text-xs text-ink-3" data-server-score>
+                اتسجّلت على الخادم: {serverScore.score} / {serverScore.total}
+              </p>
+            )}
           </div>
           {questions.map((q, i) => {
             const a = answers[i];

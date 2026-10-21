@@ -151,6 +151,42 @@ Next action ── hint · question · contrasting experiment · remediation · 
 - **The Problem Solver Framework** scaffolding fades from full to partial to none as mastery grows.
 - **AI tutor** (`app/api/tutor/route.ts`): a Socratic tutor in Egyptian Arabic, grounded on each mission's verified relation and the current workspace state. It uses Claude through `@anthropic-ai/sdk` (default model `claude-opus-5-5`, low effort, server-side refusal fallback). It is called only for free-text questions or deeper hints. Without an API key, or on any error, the deterministic rules engine answers instead.
 
+## Architecture: domain model, API v1, service layer
+
+```
+lib/domain/*        zod schemas = data structures + relationships (types inferred, OpenAPI generated)
+lib/server/*        simulated backend: in-memory store seeded from the content modules, services, route handlers
+app/api/v1/**       68 REST endpoints (generated from lib/server/endpoints.ts)
+lib/api/*           frontend service layer (typed client, one function per endpoint, TanStack Query hooks)
+lib/engines/*       client engine registry: hydrates content records, runs code engines or declarative outcome rules
+```
+
+- **Data model** (`docs/backend/data-model.md`): an ER diagram covering:
+  - curriculum: subjects, units, concepts in a knowledge graph, syllabus outcomes;
+  - equations and quantities, misconceptions and interventions;
+  - simulation engines, visual components and visualizations;
+  - content: missions, exams, labs, phenomena, workbench problems with solution graphs;
+  - runtime: sessions, events, the learner model;
+  - people: classrooms, parents, assignments;
+  - authoring: templates, studio drafts, versions, AI generation jobs.
+- **API** (`docs/backend/api.md`, live contract at `/api/v1/openapi.json`):
+  - catalog and content;
+  - server-side grading (prediction, equation, numeric, exam, phenomenon, workbench steps, declarative outcomes);
+  - sessions and events;
+  - learner model, recommendations and dashboard;
+  - teacher classes, assignments and reasoning reports;
+  - parent reports;
+  - studio drafts, publish and versions;
+  - solution-graph validation and AI generation jobs.
+
+  Demo auth uses the `mikhyal_user` cookie or the `x-mikhyal-user` header.
+- **Frontend** consumers use the service layer:
+  - learning path, mission player, exam mode, labs progress, Workbench, phenomena answers;
+  - tutor, teacher dashboard, graph authoring, parent report.
+
+  Server components (static pages) call the same services directly. Grading keeps a local deterministic fallback when offline.
+- **Regenerate** after editing the endpoint table: `npx tsx scripts/gen-api-routes.ts && npx tsx scripts/gen-api-docs.ts`.
+
 ## Stack
 
 Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui (Radix) · lucide icons · GSAP + ScrollTrigger · Mafs + @use-gesture (draggable vectors and handles) · SVG simulations · Math.js (expressions and units) · KaTeX · Anthropic SDK · Vitest · Manim (offline clips).
@@ -195,7 +231,7 @@ tests/                  Vitest suites
 ## Next steps
 
 - Map missions against the current Grade 11/12 and Egyptian Baccalaureate syllabi.
-- Add a backend (accounts, PostgreSQL, event store) so the learner model and waitlist persist beyond the browser.
-- Add a teacher console and parent summaries, and an authoring tool for new missions.
+- Replace the in-memory store (`lib/server/db/store.ts`) with PostgreSQL repositories and real auth; the API contract stays the same.
+- Build the student, teacher and parent dashboards and the studio UI on top of the existing endpoints.
 - Add SymPy (restricted language, explicit assumptions, time limits) and Pint behind `/api/workbench/validate` as a second opinion to the numeric checks.
 - Run a pilot with pre/post transfer tests and pricing experiments.

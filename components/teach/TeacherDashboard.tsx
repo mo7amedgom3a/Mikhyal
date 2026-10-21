@@ -1,8 +1,21 @@
 "use client";
 import { useState } from "react";
 import { Route, Sparkles, Target, Users } from "lucide-react";
-import type { ClassReport, MockStudent } from "@/lib/mock/classroom";
+import type { ClassReport } from "@/lib/domain";
 import { STAGE_LABEL } from "@/lib/mock/classroom";
+import { useActAs, useClassReport } from "@/lib/api/hooks";
+import { DEMO_TEACHER_ID } from "@/lib/api/demo";
+
+type MockStudent = ClassReport["students"][number];
+
+/** Loads the class report from the API as the demo teacher. */
+export function TeacherDashboardPage({ classroomId = "cls_3_2" }: { classroomId?: string }) {
+  useActAs(DEMO_TEACHER_ID);
+  const report = useClassReport(classroomId);
+  if (report.error) return <main className="mx-auto max-w-[1200px] p-8 text-ink-2" role="alert">مش قادرين نحمّل تقرير الفصل.</main>;
+  if (!report.data) return <main className="mx-auto mt-8 h-[70vh] max-w-[1200px] animate-pulse rounded-[20px] border-2 border-border bg-sim" aria-label="بيحمّل التقرير" />;
+  return <TeacherDashboard report={report.data} />;
+}
 import { brakingWorkbench } from "@/lib/workbench/problems/braking";
 import { MathText } from "@/components/ui/MathText";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

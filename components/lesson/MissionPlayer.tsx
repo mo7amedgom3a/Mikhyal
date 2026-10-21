@@ -1,11 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getMission } from "@/lib/missions";
-import { STEP_ORDER, type ChoiceRule, type Diagnosis, type ExperimentOutcome, type LearningEvent, type StepId } from "@/lib/engine/types";
+import { STEP_ORDER, type ChoiceRule, type Diagnosis, type ExperimentOutcome, type LearningEvent, type Mission, type StepId } from "@/lib/engine/types";
 import { checkEquation, checkNumeric } from "@/lib/engine/evaluator";
 import { decideNext, nextHint, shouldUseLLM, solverScaffold, ERROR_LABELS, type NextAction } from "@/lib/engine/pedagogy";
-import { emptyState, loadState, missionMastery, recordEvent, recordEvidence, saveState, type LearnerState } from "@/lib/engine/learnerModel";
+import { emptyState, missionMastery, recordEvent, recordEvidence, type LearnerState } from "@/lib/engine/learnerModel";
+import type { LearnerModel } from "@/lib/domain";
+import { useLearnerModel, useMission } from "@/lib/api/hooks";
+import { gradingService, learnerService, sessionService, tutorService } from "@/lib/api/services";
+import { hydrateMission } from "@/lib/engines/missions";
 import type { TutorRequest, TutorResponse } from "@/lib/engine/tutor";
 import { SIMS } from "@/components/sims";
 import { snapToParam } from "@/components/sims/useSimClock";
@@ -62,8 +65,42 @@ interface Feedback {
   diagnosis?: Diagnosis;
 }
 
+/** Loads the mission record and learner model from the API, starts a session, then renders the player. */
 export function MissionPlayer({ missionId }: { missionId: string }) {
-  const mission = getMission(missionId)!;
+  const detail = useMission(missionId);
+  const learner = useLearnerModel();
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const mission = useMemo(() => (detail.data ? hydrateMission(detail.data.mission, detail.data.exam ?? undefined) : null), [detail.data]);
+  const recordId = detail.data?.mission.id;
+  useEffect(() => {
+    if (!recordId) return;
+    let alive = true;
+    sessionService
+      .start(recordId, "discovery")
+      .then((s) => alive && setSessionId(s.id))
+      .catch(() => alive && setSessionId("offline"));
+    return () => {
+      alive = false;
+    };
+  }, [recordId]);
+
+  if (detail.error)
+    return (
+      <div className="mx-auto max-w-lg p-8 text-center text-ink-2" role="alert">
+        مش قادرين نحمّل المهمة دلوقتي. <Link href="/learn" className="font-semibold text-primary underline">ارجع للمسار</Link>
+      </div>
+    );
+  if (!mission || !recordId || learner.isLoading || !sessionId)
+    return <div className="mx-auto mt-10 h-[60vh] max-w-[1280px] animate-pulse rounded-[20px] border-2 border-border bg-sim" aria-label="بيحمّل المهمة" />;
+  return <MissionPlayerView mission={mission} recordId={recordId} examId={detail.data?.exam?.id} sessionId={sessionId} initialLearner={learner.data} />;
+}
+
+function toLearnerState(m?: LearnerModel): LearnerState {
+  if (!m) return emptyState();
+  return { concepts: m.concepts, errors: m.errors as LearnerState["errors"], completedMissions: m.completedMissions, events: [] };
+}
+
+function MissionPlayerView({ mission, recordId, examId, sessionId, initialLearner }: { mission: Mission; recordId: string; examId?: string; sessionId: string; initialLearner?: LearnerModel }) {
   const defaults = useMemo(
     () => Object.fromEntries(mission.experiment.params.map((p) => [p.key, p.default])),
     [mission],
@@ -72,8 +109,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
   const [mode, setMode] = useState<"discovery" | "exam">("discovery");
   const [stepIdx, setStepIdx] = useState(0);
   const [maxReached, setMaxReached] = useState(0);
-  const [learner, setLearner] = useState<LearnerState>(emptyState);
-  const [hydrated, setHydrated] = useState(false);
+  const [learner, setLearner] = useState<LearnerState>(() => toLearnerState(initialLearner));
 
   const [params, setParams] = useState<Record<string, number>>(defaults);
   const [runKey, setRunKey] = useState(0);
@@ -102,24 +138,23 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
   const step = STEP_ORDER[stepIdx];
   const mastery = missionMastery(learner, mission.concepts);
 
-  useEffect(() => {
-    setLearner(loadState());
-    setHydrated(true);
-  }, []);
-  useEffect(() => {
-    if (hydrated) saveState(learner);
-  }, [learner, hydrated]);
 
   const log = useCallback(
     (e: Omit<LearningEvent, "missionId" | "at">, evidence?: { correct: boolean; hints?: number }) => {
+      const at = Date.now();
+      // Optimistic local update; the server applies the same BKT update and stays the source of truth.
       setLearner((s) => {
-        let next = recordEvent(s, { ...e, missionId: mission.id, at: Date.now() });
+        let next = recordEvent(s, { ...e, missionId: mission.id, at });
         if (evidence) next = recordEvidence(next, mission.concepts, evidence.correct, evidence.hints ?? 0);
         return next;
       });
       if (e.diagnosis) setSessionErrors((d) => [...d, e.diagnosis!]);
+      if (sessionId !== "offline")
+        sessionService
+          .events(sessionId, [{ ...e, contentId: mission.id, at, evidence: evidence ? { conceptKeys: mission.concepts, correct: evidence.correct, hintsUsed: evidence.hints ?? 0 } : undefined }])
+          .catch(() => undefined);
     },
-    [mission],
+    [mission, sessionId],
   );
 
   const goTo = (i: number) => {
@@ -129,6 +164,8 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
     setRevealed(false);
     if (STEP_ORDER[i] === "reflect" && !learner.completedMissions.includes(mission.id)) {
       setLearner((s) => ({ ...s, completedMissions: [...s.completedMissions, mission.id] }));
+      learnerService.completeMission(recordId).catch(() => undefined);
+      if (sessionId !== "offline") sessionService.complete(sessionId).catch(() => undefined);
     }
   };
   const next = () => goTo(Math.min(stepIdx + 1, STEP_ORDER.length - 1));
@@ -170,12 +207,20 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
     return n;
   };
 
-  const submitPrediction = () => {
+  const submitPrediction = async () => {
     if (!choice) return;
-    const correct = choice === mission.prediction.correctId;
-    const rule: ChoiceRule | undefined = mission.prediction.rules.find((r) => r.choiceId === choice);
     setPredictionLocked(true);
-    const diagnosis = rule ? { ruleId: rule.ruleId, errorType: rule.errorType, prompt: rule.prompt } : undefined;
+    let correct: boolean;
+    let diagnosis: Diagnosis | undefined;
+    try {
+      const r = await gradingService.predict(recordId, choice);
+      correct = r.correct;
+      diagnosis = r.diagnosis;
+    } catch {
+      correct = choice === mission.prediction.correctId;
+      const rule: ChoiceRule | undefined = mission.prediction.rules.find((r) => r.choiceId === choice);
+      diagnosis = correct || !rule ? undefined : { ruleId: rule.ruleId, errorType: rule.errorType, prompt: rule.prompt };
+    }
     log({ step: "predict", kind: "prediction", correct, diagnosis, detail: choice }, { correct });
     setFeedback({
       action: correct
@@ -185,15 +230,15 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
     });
   };
 
-  const submitEquation = () => {
+  const submitEquation = async () => {
     const d = mission.discovery;
-    const res = checkEquation(equation, {
-      variables: Object.keys(d.variables),
-      targets: d.targets,
-      domain: d.domain,
-      wrongRelations: d.wrongRelations,
-      forbiddenSymbols: d.forbiddenSymbols,
-    });
+    let res: { status: "correct" | "incorrect" | "parse_error"; diagnosis?: Diagnosis };
+    try {
+      res = await gradingService.checkEquation(recordId, equation, { attempts: (attempts.discover ?? 0) + 1, hintLevel: hintLevel.discover ?? 0 });
+    } catch {
+      // Offline: same deterministic checker locally.
+      res = checkEquation(equation, { variables: Object.keys(d.variables), targets: d.targets, domain: d.domain, wrongRelations: d.wrongRelations, forbiddenSymbols: d.forbiddenSymbols });
+    }
     if (res.status === "parse_error") {
       setFeedback({
         action: { kind: "hint", message: "مش قادر أقرا المعادلة. اكتبها كده مثلًا: a = F/m أو v^2 = u^2 + ...", hintLevel: 0, reveal: false },
@@ -211,9 +256,14 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
     setFeedback({ action, diagnosis });
   };
 
-  const submitNumeric = () => {
+  const submitNumeric = async () => {
     const a = mission.application;
-    const res = checkNumeric(numeric, a.answer, a.wrongValues);
+    let res: { status: "correct" | "incorrect" | "parse_error"; diagnosis?: Diagnosis };
+    try {
+      res = await gradingService.checkAnswer(recordId, numeric, { attempts: (attempts.apply ?? 0) + 1, hintLevel: hintLevel.apply ?? 0 });
+    } catch {
+      res = checkNumeric(numeric, a.answer, a.wrongValues);
+    }
     if (res.status === "parse_error") {
       setFeedback({ action: { kind: "hint", message: `اكتب رقم وبعده الوحدة، ${a.unitHint}`, hintLevel: 0, reveal: false } });
       return;
@@ -265,8 +315,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
         context: workspaceContext(),
         history: messages.slice(-6).map((m) => ({ role: m.role, text: m.text })),
       };
-      const res = await fetch("/api/tutor", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(req) });
-      const data = (await res.json()) as TutorResponse;
+      const data: TutorResponse = await tutorService.ask(req);
       setHintLevel((x) => ({ ...x, [s]: data.hintLevel }));
       setMessages((m) => [...m, { role: "tutor", text: data.reply, source: data.source }]);
     } catch {
@@ -330,6 +379,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
         <main className="px-4 py-8">
           <ExamMode
             mission={mission}
+            examId={examId}
             onAnswer={(correct, rule) =>
               log(
                 { step: "exam", kind: "exam_answer", correct, diagnosis: rule ? { ruleId: rule.ruleId, errorType: rule.errorType, prompt: rule.prompt } : undefined },

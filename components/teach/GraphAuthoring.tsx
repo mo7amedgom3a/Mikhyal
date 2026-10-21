@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CircleAlert, CircleX, Copy, Download, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { brakingWorkbench } from "@/lib/workbench/problems/braking";
+import { studioService } from "@/lib/api/services";
 import { multiDependencyNodes, validateGraph } from "@/lib/workbench/graph";
 import { HINT_TIERS, type GraphEdgeType, type GraphNode, type GraphNodeType, type Intervention, type SolutionGraph } from "@/lib/workbench/types";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,15 @@ export function GraphAuthoring() {
   const [selected, setSelected] = useState<string>("distance_from_time");
   const [newEdge, setNewEdge] = useState<{ from: string; to: string; type: GraphEdgeType }>({ from: "known_u", to: "final_distance", type: "dependency" });
   const [copied, setCopied] = useState(false);
+  const [server, setServer] = useState<{ count: number; at: string } | "error" | null>(null);
+  const checkOnServer = async () => {
+    try {
+      const r = await studioService.validateGraph(graph, SYMBOLS);
+      setServer({ count: r.issues.filter((i) => i.level === "error").length, at: new Date().toLocaleTimeString("ar-EG") });
+    } catch {
+      setServer("error");
+    }
+  };
 
   useEffect(() => {
     try {
@@ -87,6 +97,9 @@ export function GraphAuthoring() {
           <Button size="sm" variant="outline" onClick={addNode} data-add-node>
             <Plus /> عقدة
           </Button>
+          <Button size="sm" variant="outline" onClick={checkOnServer} data-server-validate>
+            تحقق على الخادم
+          </Button>
           <Button size="sm" variant="ghost" onClick={() => setGraph(clone(brakingWorkbench.graph))}>
             <RotateCcw /> استرجاع الأصل
           </Button>
@@ -103,6 +116,11 @@ export function GraphAuthoring() {
             {i.message_ar}
           </span>
         ))}
+        {server && (
+          <Badge variant={server !== "error" && server.count === 0 ? "mint" : "amber"} data-server-result>
+            {server === "error" ? "الخادم مش متاح" : `الخادم: ${server.count} أخطاء · ${server.at}`}
+          </Badge>
+        )}
         {multi.length > 0 && <Badge variant="outline" className="whitespace-normal">عقد متعددة الاعتماد: {multi.join("، ")}</Badge>}
       </div>
 

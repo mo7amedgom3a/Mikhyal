@@ -1,6 +1,10 @@
+"use client";
 import Link from "next/link";
 import { ArrowLeft, Clock, Lightbulb, MessageCircleHeart, Sparkles, Eye, TrendingUp } from "lucide-react";
-import { CATEGORY_MASTERY, CHILD, COMPLETED, INSIGHTS, SOLVER_SKILLS, WEEK } from "@/lib/mock/family";
+import { useQuery } from "@tanstack/react-query";
+import { useActAs, useChildReport } from "@/lib/api/hooks";
+import { parentService } from "@/lib/api/services";
+import { DEMO_PARENT_ID } from "@/lib/api/demo";
 import { MathText } from "@/components/ui/MathText";
 import { Badge } from "@/components/ui/badge";
 
@@ -24,11 +28,24 @@ function Meter({ label, value, trend }: { label: string; value: number; trend?: 
 }
 
 export function ParentReport() {
+  useActAs(DEMO_PARENT_ID);
+  const kids = useQuery({ queryKey: ["me", "children"], queryFn: parentService.children });
+  const childId = kids.data?.items[0]?.child.id ?? "";
+  const report = useChildReport(childId, !!childId);
+  if (kids.error || report.error) return <main className="mx-auto max-w-[1000px] p-8 text-ink-2" role="alert">مش قادرين نحمّل التقرير.</main>;
+  if (!report.data) return <main className="mx-auto mt-8 h-[70vh] max-w-[1000px] animate-pulse rounded-[20px] border-2 border-border bg-sim" aria-label="بيحمّل التقرير" />;
+  const r = report.data;
+  const CHILD = r.child;
+  const WEEK = r.week;
+  const CATEGORY_MASTERY = r.categoryMastery;
+  const SOLVER_SKILLS = r.solverSkills;
+  const INSIGHTS = r.insights;
+  const COMPLETED = r.discussionPrompts;
   return (
     <main className="mx-auto max-w-[1000px] space-y-6 px-4 py-8">
       <header className="space-y-1">
         <p className="text-sm font-bold text-primary">
-          تقرير ولي الأمر · {CHILD.week} · بيانات تجريبية
+          تقرير ولي الأمر · {CHILD.week} · {r.source === "live" ? "بيانات حية + تجريبية" : "بيانات تجريبية"}
         </p>
         <h1 className="font-display text-4xl font-extrabold text-ink">{CHILD.name} بتفكر إزاي؟</h1>
         <p className="text-ink-2">مش بس الدرجات: إزاي بتوصل للحل، وفين محتاجة تعوّد.</p>

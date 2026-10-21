@@ -4,6 +4,7 @@ import { CircleCheck, Circle, Clapperboard, Lightbulb, ListChecks, Network, Serv
 import type { TutorRequest, TutorResponse } from "@/lib/engine/tutor";
 import type { AuthoredStep, SolutionStep, StepValidation, WorkbenchProblem } from "@/lib/workbench/types";
 import { HINT_TIERS } from "@/lib/workbench/types";
+import { tutorService, workbenchService } from "@/lib/api/services";
 import { checklistStatus, makeStep, stepId, uuid } from "@/lib/workbench/steps";
 import { nextNode, pathStatus, reachedFromValidations, validateSequence } from "@/lib/workbench/validate";
 import { Badge } from "@/components/ui/badge";
@@ -54,13 +55,7 @@ export function Workbench({ problem }: { problem: WorkbenchProblem }) {
       const prior = Object.fromEntries(list.map((e) => [e.step.step_id, e.attempts.filter((a) => a.validation.action !== "accept").length]));
       let result: StepValidation[];
       try {
-        const res = await fetch("/api/workbench/validate", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ problem_id: problem.id, steps, prior_failed_attempts: prior }),
-        });
-        if (!res.ok) throw new Error(String(res.status));
-        result = ((await res.json()) as { validations: StepValidation[] }).validations;
+        result = (await workbenchService.validate(problem.id, steps, { prior_failed_attempts: prior })).validations;
         setSource("server");
       } catch {
         result = validateSequence(problem, steps, { priorFailedAttempts: prior });
@@ -103,8 +98,7 @@ export function Workbench({ problem }: { problem: WorkbenchProblem }) {
     };
     let reply: TutorResponse;
     try {
-      const res = await fetch("/api/tutor", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(req) });
-      reply = (await res.json()) as TutorResponse;
+      reply = await tutorService.ask(req);
     } catch {
       reply = { reply: problem.hints.strategic, hintLevel: 1, source: "rules" };
     }

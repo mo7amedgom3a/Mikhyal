@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { ArrowLeft, Atom, Check, Compass, Puzzle, Scale, Sigma, Sparkles } from "lucide-react";
-import { MISSIONS } from "@/lib/missions";
 import { MissionIcon } from "@/lib/missions/icons";
-import { emptyState, loadState, missionMastery, type LearnerState } from "@/lib/engine/learnerModel";
+import { emptyState, missionMastery, type LearnerState } from "@/lib/engine/learnerModel";
+import { useCatalog, useLearnerModel } from "@/lib/api/hooks";
+import { conceptKey } from "@/lib/engines/ids";
 import { ERROR_LABELS } from "@/lib/engine/pedagogy";
 import type { ErrorType } from "@/lib/engine/types";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { MasteryRing, masteryLabel } from "./MasteryIndicator";
 
 export function LearningPath() {
-  const [state, setState] = useState<LearnerState>(emptyState);
-  useEffect(() => {
-    setState(loadState());
-  }, []);
+  const catalog = useCatalog({ type: "mission", limit: 200 });
+  const model = useLearnerModel();
+  const state: LearnerState = model.data ? { ...emptyState(), concepts: model.data.concepts, errors: model.data.errors as LearnerState["errors"], completedMissions: model.data.completedMissions } : emptyState();
+  const MISSIONS = (catalog.data?.items ?? [])
+    .map((c) => ({ ...c, id: c.slug, concepts: c.conceptIds.map(conceptKey), enrichment: c.tags.includes("enrichment") }))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  if (catalog.isLoading) return <main className="mx-auto mt-8 h-[60vh] max-w-[1100px] animate-pulse rounded-[20px] border-2 border-border bg-sim" aria-label="بيحمّل المسار" />;
+  if (!MISSIONS.length) return <main className="mx-auto max-w-[1100px] p-8 text-ink-2">مش قادرين نحمّل المهمات دلوقتي.</main>;
   const next = MISSIONS.find((m) => !state.completedMissions.includes(m.id)) ?? MISSIONS[0];
   const totalErrors = Object.values(state.errors).reduce((a, b) => a + b, 0);
 

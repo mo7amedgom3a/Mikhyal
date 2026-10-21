@@ -32,7 +32,7 @@ import { ChatReplay } from "@/components/landing/motion/ChatReplay";
 import { EngineFlow } from "@/components/landing/motion/EngineFlow";
 import { TiltCard } from "@/components/landing/motion/TiltCard";
 import { ScrollProgress } from "@/components/landing/motion/ScrollProgress";
-import { MISSIONS } from "@/lib/missions";
+import { publishedMissions } from "@/lib/server/services/content";
 import { MissionIcon } from "@/lib/missions/icons";
 
 const SUBJECT_LABEL = { physics: "فيزياء", math: "رياضيات", applied: "رياضيات تطبيقية" } as const;
@@ -149,7 +149,7 @@ export default function Home() {
           <section id="missions" className="scroll-mt-20 px-4 py-24">
             <SectionTitle kicker="المهمات" title="مشكلة حقيقية في كل درس" sub="إحدى عشرة مهمة جاهزة في النسخة التجريبية — كل واحدة فيها محاكاة حقيقية، اكتشاف للعلاقة، تطبيق، ووضع امتحان." />
             <div data-stagger className="mx-auto mt-12 grid max-w-[1100px] gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {MISSIONS.map((m) => (
+              {publishedMissions().map((rec) => ({ ...rec, id: rec.slug })).map((m) => (
                 <TiltCard key={m.id}>
                   <Link
                     href={`/learn/${m.id}`}

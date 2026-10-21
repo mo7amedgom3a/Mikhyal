@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ArrowLeft, Bot, Circle, CircleCheck, Lightbulb, PartyPopper, Redo2, RotateCcw, Undo2, X } from "lucide-react";
 import type { Sandbox, SandboxLevel } from "@/lib/sandbox/types";
 import { useSandbox, type SandboxApi } from "@/lib/sandbox/useSandbox";
+import { tutorService } from "@/lib/api/services";
 import type { TutorRequest, TutorResponse } from "@/lib/engine/tutor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -112,8 +113,7 @@ export function SandboxShell<S, Sol>({
         context: `${api.describe()} | Unmet goals: ${unmet.join(" ; ") || "none"}`,
         history: messages.slice(-6).map((m) => ({ role: m.role, text: m.text })),
       };
-      const res = await fetch("/api/tutor", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(req) });
-      const data = (await res.json()) as TutorResponse;
+      const data: TutorResponse = await tutorService.ask(req);
       setHintLevel(data.hintLevel);
       setMessages((m) => [...m, { role: "tutor", text: data.reply, source: data.source }]);
     } catch {

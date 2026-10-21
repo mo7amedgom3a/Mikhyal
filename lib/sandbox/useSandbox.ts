@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Sandbox, SandboxLevel } from "./types";
 import { loadProgress, markSolved, type SandboxProgress } from "./progress";
-import { loadState, recordEvent, recordEvidence, saveState } from "@/lib/engine/learnerModel";
+import { learnerService } from "@/lib/api/services";
 
 interface History<S> {
   past: S[];
@@ -30,7 +30,13 @@ export function useSandbox<S, Sol>(sandbox: Sandbox<S, Sol>, level: SandboxLevel
     startedAt.current = Date.now();
     credited.current = false;
   }, [level]);
-  useEffect(() => setProgress(loadProgress()), []);
+  useEffect(() => {
+    let alive = true;
+    loadProgress().then((p) => alive && setProgress(p));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const commit = useCallback((next: S, opts: { coalesce?: boolean } = {}) => {
     setH((cur) => {
@@ -54,19 +60,21 @@ export function useSandbox<S, Sol>(sandbox: Sandbox<S, Sol>, level: SandboxLevel
   useEffect(() => {
     if (!solved || credited.current) return;
     credited.current = true;
-    setProgress(markSolved(sandbox.id, level.id));
-    let learner = loadState();
-    learner = recordEvent(learner, {
-      missionId: `sandbox:${sandbox.id}`,
-      step: "sandbox",
-      kind: "sandbox_level_complete",
-      correct: true,
-      detail: `${level.id} edits=${edits} seconds=${Math.round((Date.now() - startedAt.current) / 1000)}`,
-      at: Date.now(),
-    });
-    // Fewer edits = more independent evidence, mirroring how hints discount mastery.
-    learner = recordEvidence(learner, level.concepts, true, edits > 12 ? 1 : 0);
-    saveState(learner);
+    setProgress((p) => markSolved(p, sandbox.id, level.id));
+    learnerService
+      .events([
+        {
+          contentId: `lab_${sandbox.id}`,
+          step: "sandbox",
+          kind: "sandbox_level_complete",
+          correct: true,
+          detail: `${level.id} edits=${edits} seconds=${Math.round((Date.now() - startedAt.current) / 1000)}`,
+          // Fewer edits = more independent evidence, mirroring how hints discount mastery.
+          evidence: { conceptKeys: level.concepts, correct: true, hintsUsed: edits > 12 ? 1 : 0 },
+          at: Date.now(),
+        },
+      ])
+      .catch(() => undefined);
   }, [solved, sandbox.id, level, edits]);
 
   return {
