@@ -17,6 +17,9 @@ import * as people from "./services/people";
 import * as studio from "./services/studio";
 import { tutorReply } from "./services/tutor";
 import { openApiDocument } from "./openapi";
+import { getRun, runAgent, streamRun } from "./ai/agent";
+import { LIBRARIES, TOOLS } from "./ai/catalog";
+import { invokeTool } from "./ai/tools";
 
 // ── Meta & auth ─────────────────────────────────────────────────────────────
 export const health = route(() => ({ status: "ok", store: "memory", counts: Object.fromEntries(Object.entries(db()).map(([k, v]) => [k, (v as { count(): number }).count()])) }));
@@ -153,3 +156,39 @@ export const graphValidate = route(
 export const aiGenerate = route(({ user, body }) => studio.generate(user(), body), { body: D.AIGenerationRequest, status: 202 });
 export const aiJob = route(({ user, params }) => studio.getJob(user(), params.id));
 
+
+// ── AI agents, tools, generated lessons, datasets ───────────────────────────
+export const aiTools = route(() => ({ items: TOOLS }));
+export const aiLibraries = route(() => ({ items: LIBRARIES }));
+export const aiRunCreate = route(({ user, body }) => runAgent(user(), body), { body: D.RunRequest, status: 201 });
+export const aiRun = route(({ user, params }) => getRun(user(), params.id));
+/** EventSource cannot send headers, so the stream is addressed by its (unguessable) run id. */
+export const aiRunStream = route(({ params, query }) => {
+  const run = db().agentRuns.get(params.id);
+  if (!run) throw notFound(`run ${params.id}`);
+  return streamRun(run, Number(query.speed) || 2.5);
+});
+export const aiToolInvoke = route(({ user, params, body }) => invokeTool(params.name, body.args, { user: user() }), { body: D.ToolInvokeBody });
+export const lessons = route(() => ({ items: db().lessons.list().map(({ ui, ...l }) => ({ ...l, blocks: ui.blocks.length })) }));
+export const lesson = route(({ params }) => {
+  const l = db().lessons.list((x) => x.slug === params.slug)[0];
+  if (!l) throw notFound(`lesson ${params.slug}`);
+  return { lesson: l, run: db().agentRuns.get(l.runId) ?? null };
+});
+export const elements = route(() => ({ items: db().elements.list().sort((a, b) => a.Z - b.Z) }));
+export const elementBySymbol = route(({ params }) => {
+  const e = db().elements.list((x) => x.symbol.toLowerCase() === params.symbol.toLowerCase())[0];
+  if (!e) throw notFound(`element ${params.symbol}`);
+  return e;
+});
+export const dataset = route(({ params }) => {
+  const d = db().datasets.get(params.id);
+  if (!d) throw notFound(`dataset ${params.id}`);
+  return d;
+});
+export const topics = route(() => ({ items: db().topics.list().map((t) => ({ slug: t.slug, title: t.title, conceptKeys: t.conceptKeys, sections: t.sections.length })) }));
+export const topic = route(({ params }) => {
+  const t = db().topics.list((x) => x.slug === params.slug)[0];
+  if (!t) throw notFound(`topic ${params.slug}`);
+  return t;
+});

@@ -81,6 +81,17 @@ erDiagram
   CONTENT_ITEM ||--o{ CONTENT_VERSION : versions
   AI_GENERATION_JOB ||--o| STUDIO_DRAFT : produces
   USER ||--o{ AI_GENERATION_JOB : requests
+  USER ||--o{ AGENT_RUN : starts
+  AGENT_RUN ||--o{ AGENT_STEP : records
+  AGENT_STEP }o--o| AI_TOOL : calls
+  AI_TOOL }o--o{ TOOL_LIBRARY : uses
+  AGENT_RUN ||--o| GENERATED_LESSON : publishes
+  GENERATED_LESSON ||--|| UI_SPEC : renders
+  UI_SPEC }o--o{ TOOL_LIBRARY : requires
+  TOPIC }o--o{ CONCEPT : covers
+  AGENT_RUN }o--o| TOPIC : draws_on
+  ELEMENT_RECORD }o--o{ UI_SPEC : feeds
+  DATASET }o--o{ UI_SPEC : feeds
 ```
 
 `CONTENT_ITEM` is the shared `ContentBase` of Mission, Lab, Phenomenon, WorkbenchProblem and Exam.
@@ -98,6 +109,7 @@ erDiagram
 | `runtime.ts` | Session, LearningEvent (with optional `evidence` for the learner model), ConceptMastery, LearnerModel, Recommendation, TutorTurn |
 | `reports.ts` | ClassReport (step-validity heatmap, misconceptions, reasoning routes, per-student paths), ParentReport, StudentDashboard |
 | `authoring.ts` | Template (slots + skeleton), StudioDraft (source: template / scratch / fork / ai, live validation issues), ContentVersion, AIGenerationRequest / AIGenerationJob |
+| `ai.ts` | ToolLibrary, AiTool, UiBlock / UiSpec (generative UI `genui/1`), AgentStep, RunRequest, AgentRun, GeneratedLesson, ElementRecord, Dataset, Topic (knowledge-base outline, timeline, FAQ) |
 | `requests.ts` | Request bodies for every POST/PUT/PATCH endpoint |
 
 ## Workflows the model supports
@@ -114,6 +126,11 @@ erDiagram
   - **AI** (`/ai/generations` → job → draft).
 
   Solution graphs are validated with the same checks as the Workbench: cycles, unreachable goals, unproduced requirements and unreadable formulas.
+- **AI agents:**
+  1. `POST /ai/runs` runs the advisor or the generator.
+  2. Each tool call reads the store (topics, concepts, equations, elements, datasets, learner model) or builds and validates UI blocks.
+  3. The generator publishes a `GeneratedLesson` whose `UiSpec` the client renders generically.
+  4. Runs replay as SSE.
 - **Dashboards:**
   - student: `/me/dashboard`, `/me/progress`, `/me/recommendations`;
   - teacher: `/classes/{id}/report` and `/classes/{id}/students/{studentId}/reasoning`;

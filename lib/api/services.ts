@@ -40,7 +40,8 @@ import type { ExperimentOutcome } from "@/lib/engine/types";
 import type { SolutionStep, StepValidation } from "@/lib/workbench/types";
 import type { SubtleCase, SubtleResult } from "@/lib/workbench/subtleErrors";
 import type { GraphIssue } from "@/lib/workbench/graph";
-import { api, qs } from "./client";
+import type { AgentRun, AgentStep, AiTool, Dataset, ElementRecord, GeneratedLesson, RunRequest, ToolLibrary, Topic } from "@/lib/domain";
+import { API_BASE, api, qs } from "./client";
 
 const q = (query: ListQuery = {}) => qs(query as Record<string, string | number | undefined>);
 
@@ -143,4 +144,38 @@ export const studioService = {
 export const aiService = {
   generate: (req: Partial<AIGenerationRequest> & Pick<AIGenerationRequest, "kind" | "prompt">) => api<AIGenerationJob>("/ai/generations", { body: req }),
   job: (id: string) => api<{ job: AIGenerationJob; draft: StudioDraft | null }>(`/ai/generations/${id}`),
+};
+
+// ───────────────────────────── AI agents & knowledge base ─────────────────────────────
+
+export const agentService = {
+  tools: () => api<{ items: AiTool[] }>("/ai/tools"),
+  libraries: () => api<{ items: ToolLibrary[] }>("/ai/libraries"),
+  run: (req: RunRequest) => api<AgentRun>("/ai/runs", { body: req }),
+  get: (id: string) => api<AgentRun>(`/ai/runs/${id}`),
+  invokeTool: (name: string, args: Record<string, unknown>) => api<{ result: unknown; summary: string }>(`/ai/tools/${name}/invoke`, { body: { args } }),
+  /** Replay a run's transcript as server-sent events; returns a disposer. */
+  stream: (id: string, on: { step: (s: AgentStep) => void; done: () => void; error?: () => void }, speed = 2.5) => {
+    const es = new EventSource(`${API_BASE}/ai/runs/${id}/stream?speed=${speed}`);
+    es.addEventListener("step", (e) => on.step(JSON.parse((e as MessageEvent).data) as AgentStep));
+    es.addEventListener("done", () => {
+      es.close();
+      on.done();
+    });
+    es.onerror = () => {
+      es.close();
+      on.error?.();
+    };
+    return () => es.close();
+  },
+};
+
+export const knowledgeService = {
+  lessons: () => api<{ items: (Omit<GeneratedLesson, "ui"> & { blocks: number })[] }>("/lessons"),
+  lesson: (slug: string) => api<{ lesson: GeneratedLesson; run: AgentRun | null }>(`/lessons/${slug}`),
+  topics: () => api<{ items: { slug: string; title: string; conceptKeys: string[]; sections: number }[] }>("/topics"),
+  topic: (slug: string) => api<Topic>(`/topics/${slug}`),
+  elements: () => api<{ items: ElementRecord[] }>("/elements"),
+  element: (symbol: string) => api<ElementRecord>(`/elements/${symbol}`),
+  dataset: (id: string) => api<Dataset>(`/datasets/${id}`),
 };

@@ -75,3 +75,4 @@ export const CreateDraftBody = named(
 export const UpdateDraftBody = named("UpdateDraftBody", z.object({ title: z.string().optional(), content: z.record(z.string(), z.unknown()).optional() }));
 export const PublishBody = named("PublishBody", z.object({ note: z.string().max(500).optional() }));
 export const GraphValidateBody = named("GraphValidateBody", z.object({ graph: z.unknown(), symbols: z.array(z.string()) }));
+export const ToolInvokeBody = named("ToolInvokeBody", z.object({ args: z.record(z.string(), z.unknown()).default({}) }));

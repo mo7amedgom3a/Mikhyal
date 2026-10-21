@@ -179,14 +179,51 @@ Next action ── hint · question · contrasting experiment · remediation · 
 - **The Problem Solver Framework** scaffolding fades from full to partial to none as mastery grows.
 - **AI tutor** (`app/api/tutor/route.ts`): a Socratic tutor in Egyptian Arabic, grounded on each mission's verified relation and the current workspace state. It uses Claude through `@anthropic-ai/sdk` (default model `claude-opus-5-5`, low effort, server-side refusal fallback). It is called only for free-text questions or deeper hints. Without an API key, or on any error, the deterministic rules engine answers instead.
 
+## AI advisor & generator: generative UI from the API (`/explore/atomic-structure`, `/ai-studio`)
+
+Two simulated agents run against real tools in the backend. A deterministic planner (`mock-planner-1`) stands in for an LLM, so the whole workflow is testable offline:
+
+```
+POST /ai/runs {agent, prompt, context?, publish?}
+  → thought → tool_call → tool_result → … → message (+ ui)
+GET /ai/runs/{id}/stream
+  → the same steps as server-sent events, with simulated latency
+```
+
+- **Tools** (`GET /ai/tools`):
+  - knowledge: `search_knowledge`, `get_topic`, `get_concepts`, `get_equations`, `get_elements`, `get_dataset`;
+  - building and publishing: `list_libraries`, `compose_block`, `validate_ui`, `publish_lesson`;
+  - advising: `answer_faq`, `get_learner_state`, `recommend_content`.
+
+  Each one is also callable directly at `POST /ai/tools/{name}/invoke`.
+- **Libraries** (`GET /ai/libraries`): GenUI core, KaTeX, Mafs, whitelisted mathjs rules, SVG scenes (atom model, plum pudding, Bohr levels), canvas particles (Rutherford scattering), atomic-physics models and GSAP. A generated spec may only use scenes that some library provides.
+- **Generated UI** (`UiSpec`, `genui/1`):
+  - declarative blocks: heading, text, callout, equation, timeline, table, plot, scene, quiz, sim, section;
+  - a `sim` block declares sliders (`params`) and choices, where one option can set several values (for example an element sets Z, N and the shells);
+  - readouts and observations are expressions;
+  - child scenes and plots are bound to sim values.
+
+  `validate_ui` compiles every expression through the same whitelist as declarative labs and checks scene names, bindings and quiz answers. `components/genui/UiRenderer.tsx` renders any spec. The page holds no lesson content.
+- **Atomic structure** comes from the knowledge base (`lib/server/seed/atomic.ts`) and is served at `/topics/atomic-structure`, `/elements` and `/datasets/dst_geiger_marsden_1913`. It covers:
+  - Thomson's plum pudding vs Rutherford's nucleus;
+  - α-particle trajectories integrated in the Coulomb field (`lib/physics/atomic.ts`) with a live angle histogram;
+  - the 1913 Geiger–Marsden counts plotted against $1/\sin^4(\theta/2)$;
+  - building atoms from protons, neutrons and electron shells;
+  - Bohr levels, photon colour and wavelength.
+
+  Opening `/explore/atomic-structure` the first time runs the generator with `publish`; you watch the tool calls stream in, then the published lesson (`GET /lessons/{slug}`) renders. The advisor panel answers questions using the topic FAQ, equations and an attached visual.
+- **Swapping in a real model**: replace the planner in `lib/server/ai/agent.ts` with Claude tool use over the same `TOOL_HANDLERS`. The transcript, streaming and UI contracts stay the same.
+
 ## Architecture: domain model, API v1, service layer
 
 ```
 lib/domain/*        zod schemas = data structures + relationships (types inferred, OpenAPI generated)
 lib/server/*        simulated backend: in-memory store seeded from the content modules, services, route handlers
-app/api/v1/**       68 REST endpoints (generated from lib/server/endpoints.ts)
+app/api/v1/**       81 REST endpoints (generated from lib/server/endpoints.ts)
 lib/api/*           frontend service layer (typed client, one function per endpoint, TanStack Query hooks)
 lib/engines/*       client engine registry: hydrates content records, runs code engines or declarative outcome rules
+lib/server/ai/*     agents (advisor, generator), tool handlers, block builders, tool/library catalog
+components/genui/*  UiSpec renderer + scene library; components/ai/* transcript view, studio, explore
 ```
 
 - **Data model** (`docs/backend/data-model.md`): an ER diagram covering:

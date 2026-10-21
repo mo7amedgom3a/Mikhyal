@@ -101,4 +101,18 @@ export const ENDPOINTS: Endpoint[] = [
   E("POST", "/studio/solution-graphs/validate", "graphValidate", "Studio", "Validate a solution graph (cycles, reachability, formulas)", { roles: ["teacher"], body: D.GraphValidateBody }),
   E("POST", "/ai/generations", "aiGenerate", "AI", "Generate a lesson / lab / exam / visualization draft", { roles: ["teacher"], body: D.AIGenerationRequest, response: D.AIGenerationJob }),
   E("GET", "/ai/generations/{id}", "aiJob", "AI", "Generation job with its draft", { roles: ["teacher"] }),
+
+  E("GET", "/ai/tools", "aiTools", "AI agents", "Tools the advisor and generator agents can call"),
+  E("GET", "/ai/libraries", "aiLibraries", "AI agents", "Rendering / maths / physics libraries available to generated UI"),
+  E("POST", "/ai/runs", "aiRunCreate", "AI agents", "Run the advisor or generator agent (tool calls + message + generated UI)", { body: D.RunRequest, response: D.AgentRun }),
+  E("GET", "/ai/runs/{id}", "aiRun", "AI agents", "Agent run transcript", { response: D.AgentRun }),
+  E("GET", "/ai/runs/{id}/stream", "aiRunStream", "AI agents", "Server-sent events replaying the run step by step (?speed=)"),
+  E("POST", "/ai/tools/{name}/invoke", "aiToolInvoke", "AI agents", "Invoke one tool directly (debugging / studio)", { body: D.ToolInvokeBody }),
+  E("GET", "/lessons", "lessons", "Generated lessons", "Lessons published by the generator"),
+  E("GET", "/lessons/{slug}", "lesson", "Generated lessons", "Generated lesson (UI spec) with the run that produced it"),
+  E("GET", "/topics", "topics", "Knowledge base", "Knowledge-base topics"),
+  E("GET", "/topics/{slug}", "topic", "Knowledge base", "Topic outline, timeline and FAQ", { response: D.Topic }),
+  E("GET", "/elements", "elements", "Knowledge base", "Element data (Z, N, shells, radii, isotopes)"),
+  E("GET", "/elements/{symbol}", "elementBySymbol", "Knowledge base", "One element", { response: D.ElementRecord }),
+  E("GET", "/datasets/{id}", "dataset", "Knowledge base", "Experimental dataset (e.g. dst_geiger_marsden_1913)", { response: D.Dataset }),
 ];

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { MathText } from "@/components/ui/MathText";
 import { Tex } from "@/components/ui/Tex";
 import { PhenomenonIcon } from "@/components/phenomena/icons";
+import { GeneratedLessonsList } from "@/components/ai/GeneratedLessonsList";
 import { CATEGORY_LABEL, PHENOMENA, type PhenomenonCategory } from "@/lib/phenomena";
 
 export const metadata: Metadata = { title: "الظواهر — مِخيال" };
@@ -18,6 +19,7 @@ export default function PhenomenaIndex() {
           <h1 className="font-display text-4xl font-extrabold text-ink">ظواهر شهيرة… تكتشفها بإيدك</h1>
           <p className="max-w-3xl text-[17px] leading-8 text-ink-2">كل ظاهرة فيها التجربة اللي غيّرت الفيزيا، والمعادلة اللي بتوصفها، ومهمة بتتحل في المختبر الرياضي بتلميحات متدرّجة.</p>
         </header>
+        <GeneratedLessonsList />
         {(Object.keys(CATEGORY_LABEL) as PhenomenonCategory[]).map((cat) => (
           <section key={cat} className="space-y-3" aria-labelledby={`cat-${cat}`}>
             <div>

@@ -11,7 +11,7 @@ Base URL: `/api/v1`. JSON in, JSON out. Errors use one envelope:
 - **Ids or slugs:** content endpoints accept the id (`msn_braking`) or the slug (`braking`).
 - **Lists:** `?q=&type=&subject=&concept=&status=&cursor=&limit=` → `{ items, total, nextCursor }`.
 
-68 endpoints. Source of truth: `lib/server/endpoints.ts` → handlers in `lib/server/routes.ts` → services in `lib/server/services/*`.
+81 endpoints. Source of truth: `lib/server/endpoints.ts` → handlers in `lib/server/routes.ts` → services in `lib/server/services/*`.
 
 ## Meta
 
@@ -140,6 +140,34 @@ Base URL: `/api/v1`. JSON in, JSON out. Errors use one envelope:
 |---|---|---|---|---|---|
 | POST | `/ai/generations` | Generate a lesson / lab / exam / visualization draft | teacher | AIGenerationRequest | AIGenerationJob |
 | GET | `/ai/generations/{id}` | Generation job with its draft | teacher | — | JSON |
+
+## AI agents
+
+| Method | Path | Summary | Roles | Body | Response |
+|---|---|---|---|---|---|
+| GET | `/ai/tools` | Tools the advisor and generator agents can call | any | — | JSON |
+| GET | `/ai/libraries` | Rendering / maths / physics libraries available to generated UI | any | — | JSON |
+| POST | `/ai/runs` | Run the advisor or generator agent (tool calls + message + generated UI) | any | RunRequest | AgentRun |
+| GET | `/ai/runs/{id}` | Agent run transcript | any | — | AgentRun |
+| GET | `/ai/runs/{id}/stream` | Server-sent events replaying the run step by step (?speed=) | any | — | JSON |
+| POST | `/ai/tools/{name}/invoke` | Invoke one tool directly (debugging / studio) | any | ToolInvokeBody | JSON |
+
+## Generated lessons
+
+| Method | Path | Summary | Roles | Body | Response |
+|---|---|---|---|---|---|
+| GET | `/lessons` | Lessons published by the generator | any | — | JSON |
+| GET | `/lessons/{slug}` | Generated lesson (UI spec) with the run that produced it | any | — | JSON |
+
+## Knowledge base
+
+| Method | Path | Summary | Roles | Body | Response |
+|---|---|---|---|---|---|
+| GET | `/topics` | Knowledge-base topics | any | — | JSON |
+| GET | `/topics/{slug}` | Topic outline, timeline and FAQ | any | — | Topic |
+| GET | `/elements` | Element data (Z, N, shells, radii, isotopes) | any | — | JSON |
+| GET | `/elements/{symbol}` | One element | any | — | ElementRecord |
+| GET | `/datasets/{id}` | Experimental dataset (e.g. dst_geiger_marsden_1913) | any | — | Dataset |
 
 ## Example flows
 

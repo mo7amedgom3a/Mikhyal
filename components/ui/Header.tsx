@@ -15,7 +15,9 @@ export function Header({ cta = true }: { cta?: boolean }) {
             ["/workbench", "المختبر الرياضي", "hidden sm:inline-flex"],
             ["/phenomena", "الظواهر", "hidden md:inline-flex"],
             ["/play", "ملعب التجارب", "inline-flex"],
-            ["/features", "لكل واحد", "hidden lg:inline-flex"],
+            ["/explore/atomic-structure", "الذرة", "hidden md:inline-flex"],
+            ["/ai-studio", "استوديو AI", "hidden lg:inline-flex"],
+            ["/features", "لكل واحد", "hidden xl:inline-flex"],
           ].map(([href, label, cls]) => (
             <Button key={href} asChild variant="ghost" size="sm" className={cls}>
               <Link href={href}>{label}</Link>

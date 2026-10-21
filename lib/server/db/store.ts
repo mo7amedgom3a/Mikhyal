@@ -4,6 +4,11 @@
  * The store lives on globalThis so it survives Next.js dev hot reloads; it resets on restart.
  */
 import type {
+  AgentRun,
+  Dataset,
+  ElementRecord,
+  GeneratedLesson,
+  Topic,
   AIGenerationJob,
   Assignment,
   Classroom,
@@ -35,6 +40,7 @@ import type {
 import { CONCEPTS, OUTCOMES, SUBJECTS, UNITS } from "../seed/curriculum";
 import { buildContentSeed } from "../seed/content";
 import { ASSIGNMENTS, CLASSROOMS, ENROLLMENTS, PARENT_LINKS, TEMPLATES, USERS } from "../seed/people";
+import { ATOMIC_CONCEPTS, ATOMIC_EQUATIONS, ATOMIC_TOPIC, ELEMENTS, GEIGER_MARSDEN } from "../seed/atomic";
 
 export interface Repository<T extends { id: string }> {
   list(filter?: (item: T) => boolean): T[];
@@ -89,10 +95,10 @@ function createStore() {
     assignments: new MemoryCollection<Assignment>(ASSIGNMENTS),
     subjects: new MemoryCollection<SubjectRecord>(SUBJECTS),
     units: new MemoryCollection<Unit>(UNITS),
-    concepts: new MemoryCollection<Concept>(CONCEPTS),
+    concepts: new MemoryCollection<Concept>([...CONCEPTS, ...ATOMIC_CONCEPTS]),
     outcomes: new MemoryCollection<CurriculumOutcome>(OUTCOMES),
     quantities: new MemoryCollection<Quantity>(c.quantities),
-    equations: new MemoryCollection<Equation>(c.equations),
+    equations: new MemoryCollection<Equation>([...c.equations, ...ATOMIC_EQUATIONS]),
     misconceptions: new MemoryCollection<Misconception>(c.misconceptions),
     simulations: new MemoryCollection<SimulationEngine>(c.simulations),
     visualComponents: new MemoryCollection<VisualComponent>(c.visualComponents),
@@ -109,6 +115,11 @@ function createStore() {
     sessions: new MemoryCollection<Session>([]),
     events: new MemoryCollection<EventRow>([]),
     learners: new MemoryCollection<LearnerRow>([]),
+    elements: new MemoryCollection<ElementRecord>(ELEMENTS),
+    datasets: new MemoryCollection<Dataset>([GEIGER_MARSDEN]),
+    topics: new MemoryCollection<Topic>([ATOMIC_TOPIC]),
+    lessons: new MemoryCollection<GeneratedLesson>([]),
+    agentRuns: new MemoryCollection<AgentRun>([]),
   };
 }
 
